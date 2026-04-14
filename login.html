@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تسجيل الدخول | UniHub — EPNU</title>
+  <meta name="description" content="بوابة الطالب الجامعية — جامعة شرق بورسعيد الأهلية" />
+  <link rel="stylesheet" href="css/neu-system.css" />
+  <style>
+    /* ── Login-specific styles ── */
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      background: var(--surface);
+    }
+
+    /* Right panel — form */
+    .login-panel {
+      width: 420px;
+      flex-shrink: 0;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 48px 40px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .login-logo-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 36px;
+    }
+
+    .login-logo-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--surface);
+      box-shadow: var(--neu-raised-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .login-logo-circle img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+    }
+
+    .login-logo-text h2 {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--primary);
+      margin: 0;
+    }
+
+    .login-logo-text p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .login-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .login-subtitle {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+
+    .login-form-card {
+      background: var(--surface);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--neu-raised-lg);
+      padding: 32px;
+    }
+
+    .field-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .field-label label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .field-label a {
+      font-size: 12px;
+      color: var(--primary-light);
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    .field-label a:hover { color: var(--primary); }
+
+    .input-wrapper {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-wrapper .neu-input {
+      padding-left: 48px;
+      background: var(--surface);
+    }
+
+    .input-wrapper .input-end-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: var(--transition);
+    }
+
+    .input-wrapper .input-end-icon:hover { color: var(--primary); }
+
+    /* Remember me */
+    .remember-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .neu-checkbox {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      appearance: none;
+      background: var(--surface);
+      box-shadow: var(--neu-pressed-sm);
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+
+    .neu-checkbox:checked {
+      background: var(--primary);
+      box-shadow: 0 2px 8px rgba(0,85,164,0.4);
+    }
+
+    .neu-checkbox:checked::after {
+      content: '✓';
+      position: absolute;
+      color: white;
+      font-size: 12px;
+      font-weight: 800;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+    }
+
+    .remember-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Submit button */
+    .btn-login {
+      width: 100%;
+      padding: 15px;
+      border-radius: var(--radius-pill);
+      background: var(--primary);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      box-shadow: 0 5px 18px rgba(0,85,164,0.4);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-login:hover {
+      background: var(--primary-dark);
+      box-shadow: 0 7px 24px rgba(0,85,164,0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn-login:active { transform: translateY(0); }
+
+    /* Footer */
+    .login-footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Left panel — university branding */
+    .login-bg {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-bg-img {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(0,55,130,0.7) 0%, rgba(0,40,100,0.5) 100%),
+        url('https://epnu.edu.eg/wp-content/uploads/2024/01/campus.jpg') center/cover no-repeat;
+    }
+
+    /* Fallback gradient if photo fails */
+    .login-bg-img-fallback {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #003A78 0%, #0055A4 50%, #60A5FA 100%);
+    }
+
+    .login-bg-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 40px;
+      color: white;
+    }
+
+    .login-univ-logo {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(12px);
+      border: 3px solid rgba(255,255,255,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    }
+
+    .login-univ-logo img {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+    }
+
+    .login-univ-name-en {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+
+    .login-univ-name-ar {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.88);
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .login-bg-dots {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 40px;
+    }
+
+    .login-bg-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+    }
+
+    .login-bg-dots span:first-child { background: rgba(255,255,255,0.9); }
+
+    /* ── Error state ── */
+    .error-msg {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      background: rgba(255,33,87,0.08);
+      border: 1px solid rgba(255,33,87,0.25);
+      border-radius: var(--radius);
+      color: var(--danger);
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .error-msg.show { display: flex; }
+
+    /* ── Loading spinner ── */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    .btn-login.loading .spinner { display: block; }
+    .btn-login.loading .btn-label { display: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .login-bg { display: none; }
+      .login-panel {
+        width: 100%;
+        padding: 32px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ Right Panel: Login Form ═══ -->
+  <div class="login-panel">
+
+    <!-- Logo row -->
+    <div class="login-logo-row">
+      <div class="login-logo-circle">
+        <img src="https://epnu.edu.eg/wp-content/uploads/2024/01/epnu-logo.png"
+             alt="EPNU"
+             onerror="this.parentElement.innerHTML='<span style=\'font-weight:900;font-size:14px;color:#0055A4\'>EPNU</span>'" />
+      </div>
+      <div class="login-logo-text">
+        <h2>UniHub</h2>
+        <p>بوابة الطالب الجامعية</p>
+      </div>
+    </div>
+
+    <h1 class="login-title">تسجيل الدخول</h1>
+    <p class="login-subtitle">أدخل بيانات حسابك للمتابعة</p>
+
+    <!-- Form Card -->
+    <div class="login-form-card">
+
+      <!-- Error message -->
+      <div class="error-msg" id="error-msg" role="alert">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+        بيانات الدخول غير صحيحة. حاول مجدداً.
+      </div>
+
+      <form id="login-form" onsubmit="handleLogin(event)">
+
+        <!-- Student ID -->
+        <div class="field-label">
+          <label for="student-id">كود المستخدم (ID)</label>
+        </div>
+        <div class="input-wrapper">
+          <input
+            type="text"
+            id="student-id"
+            class="neu-input"
+            placeholder="29990001"
+            autocomplete="username"
+            required
+            aria-required="true"
+          />
+          <span class="input-end-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </span>
+        </div>
+
+        <!-- Password -->
+        <div class="field-label">
+          <label for="password">كلمة المرور</label>
+          <a href="javascript:void(0)" onclick="alert('خاصية استعادة كلمة المرور قيد التطوير. تواصل مع إدارة الجامعة.')" tabindex="-1" style="cursor:pointer">نسيت كلمة المرور؟</a>
+        </div>
+        <div class="input-wrapper">
+          <input
+            type="password"
+            id="password"
+            class="neu-input"
+            placeholder="••••••••••••"
+            autocomplete="current-password"
+            required
+            aria-required="true"
+          />
+          <span class="input-end-icon" id="pwd-toggle" onclick="togglePassword()" aria-label="إظهار/إخفاء كلمة المرور" role="button" tabindex="0">
+            <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </span>
+        </div>
+
+        <!-- Remember me -->
+        <div class="remember-row">
+          <input type="checkbox" id="remember" class="neu-checkbox" />
+          <label for="remember" class="remember-label">تذكّرني</label>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-login" id="login-btn">
+          <span class="spinner"></span>
+          <span class="btn-label">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-left:4px"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+            تسجيل الدخول
+          </span>
+        </button>
+
+      </form>
+    </div>
+
+    <div class="login-footer">
+      © <span id="login-year"></span> جامعة شرق بورسعيد الأهلية — جميع الحقوق محفوظة
+    </div>
+  </div>
+
+  <!-- ═══ Left Panel: University Branding ═══ -->
+  <div class="login-bg">
+    <div class="login-bg-img-fallback"></div>
+    <div class="login-bg-img"></div>
+
+    <div class="login-bg-content">
+      <!-- University Seal -->
+      <div class="login-univ-logo">
+        <img
+          src="https://epnu.edu.eg/wp-content/uploads/2024/01/epnu-logo.png"
+          alt="شعار جامعة شرق بورسعيد الأهلية"
+          onerror="this.style.display='none'"
+        />
+      </div>
+
+      <div class="login-univ-name-en">
+        East Port Said<br/>National University
+      </div>
+      <div class="login-univ-name-ar">جامعة شرق بورسعيد الأهلية</div>
+
+      <div class="login-bg-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Toggle password visibility
+    function togglePassword() {
+      const input = document.getElementById('password');
+      const icon  = document.getElementById('eye-icon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+          <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+          <line x1="1" y1="1" x2="23" y2="23"/>`;
+      } else {
+        input.type = 'password';
+        icon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>`;
+      }
+    }
+
+    // Login handler — simulate then redirect to home
+    function handleLogin(e) {
+      e.preventDefault();
+      const btn   = document.getElementById('login-btn');
+      const error = document.getElementById('error-msg');
+      const id    = document.getElementById('student-id').value.trim();
+      const pwd   = document.getElementById('password').value.trim();
+
+      error.classList.remove('show');
+      btn.classList.add('loading');
+
+      // Simulate API call
+      setTimeout(() => {
+        btn.classList.remove('loading');
+        if (id && pwd) {
+          // Store user data for demo
+          sessionStorage.setItem('unihub_user', JSON.stringify({
+            id, name: 'أحمد محمود صالح', program: 'Computer Science',
+            faculty: 'Faculty of Computer Science and Information Technology',
+            year: '2025-2026', semester: 'ثاني'
+          }));
+          window.location.href = 'home.html';
+        } else {
+          error.classList.add('show');
+        }
+      }, 1200);
+    }
+
+    // Keyboard support for pwd toggle
+    document.getElementById('pwd-toggle').addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePassword(); }
+    });
+
+    // Dynamic year
+    const yearEl = document.getElementById('login-year');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

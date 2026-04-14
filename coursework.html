@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>أعمال السنة | UniHub — EPNU</title>
+  <meta name="description" content="المقررات الدراسية — تصفح مقررات فصلك الدراسي ومعلومات كل مادة" />
+  <link rel="stylesheet" href="css/neu-system.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <style>
+    /* ── Profile Strip ── */
+    .profile-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      padding: 20px;
+      margin-bottom: 28px;
+    }
+
+    .profile-field {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--neu-flat);
+      padding: 12px 14px;
+      transition: var(--transition);
+    }
+
+    .profile-field:hover { box-shadow: var(--neu-raised-sm); }
+
+    .pf-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      box-shadow: var(--neu-pressed-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--primary);
+    }
+
+    .pf-label  { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 3px; }
+    .pf-value  { font-size: 12.5px; font-weight: 700; color: var(--text); line-height: 1.3; }
+
+    /* ── Section header ── */
+    .section-bar {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: var(--radius) var(--radius) 0 0;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 0;
+    }
+
+    /* ── Course card ── */
+    .course-wrap {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .course-wrap:hover { box-shadow: var(--neu-raised-lg); }
+
+    .course-header {
+      padding: 18px 20px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(0,65,130,0.07);
+      gap: 16px;
+      transition: background 0.2s;
+    }
+
+    .course-header:hover { background: rgba(0,85,164,0.03); }
+
+    .course-header-left { flex: 1; min-width: 0; }
+
+    .course-name-en {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .course-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+
+    .course-header-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .score-label { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
+
+    .score-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .score-sep { font-size: 18px; color: var(--text-muted); margin: 0 2px; }
+    .score-max { font-size: 15px; color: var(--text-muted); }
+
+    /* Course body */
+    .course-body {
+      padding: 20px;
+    }
+
+    /* Status row */
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 12px 20px;
+      background: rgba(0,85,164,0.03);
+      border-bottom: 1px solid rgba(0,65,130,0.06);
+    }
+
+    .status-label-txt { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+
+    /* Empty state */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 36px 20px;
+      text-align: center;
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--neu-pressed-sm);
+    }
+
+    .empty-state svg { opacity: 0.25; margin-bottom: 12px; }
+    .empty-state p { font-size: 13.5px; color: var(--text-muted); margin: 0; }
+
+    /* Semester chip */
+    .semester-chip {
+      background: var(--surface);
+      box-shadow: var(--neu-flat);
+      border-radius: var(--radius-pill);
+      padding: 4px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) { .profile-strip { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 580px) { .profile-strip { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) {
+      .course-header {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .course-header-right {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .score-value { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar-mount"></div>
+  <div id="topbar-mount"></div>
+
+  <main class="main-content">
+    <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">أعمال السنة والمقررات</h1>
+    
+
+    <!-- ── Profile Strip ── -->
+    <div class="profile-strip">
+
+      <div class="profile-field">
+        <div class="pf-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+        </div>
+        <div>
+          <div class="pf-label">الكلية</div>
+          <div class="pf-value">Faculty of Computer Science and IT</div>
+        </div>
+      </div>
+
+      <div class="profile-field">
+        <div class="pf-icon" style="color:var(--success)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div>
+          <div class="pf-label">البرنامج</div>
+          <div class="pf-value">Computer Science</div>
+        </div>
+      </div>
+
+      <div class="profile-field">
+        <div class="pf-icon" style="color:var(--info)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </div>
+        <div>
+          <div class="pf-label">العام الدراسي</div>
+          <div class="pf-value">2025-2026</div>
+        </div>
+      </div>
+
+      <div class="profile-field">
+        <div class="pf-icon" style="color:var(--warning)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div>
+          <div class="pf-label">الفصل الدراسي</div>
+          <div class="pf-value">الثاني</div>
+        </div>
+      </div>
+
+      <div class="profile-field">
+        <div class="pf-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="pf-label">اسم الطالب</div>
+          <div class="pf-value">أحمد محمود صالح</div>
+        </div>
+      </div>
+
+      <div class="profile-field">
+        <div class="pf-icon" style="color:#374151">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="5" width="20" height="14" rx="2"/>
+            <line x1="2" y1="10" x2="22" y2="10"/>
+          </svg>
+        </div>
+        <div>
+          <div class="pf-label">كود الطالب</div>
+          <div class="pf-value">29990001</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Section header ── -->
+    <div class="section-bar" style="margin-bottom:24px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+      </svg>
+      أعمال السنة الدراسية
+    </div>
+
+    <!-- ════════════════════════════════
+         COURSES (6 — from actual data)
+         ════════════════════════════════ -->
+
+    <!-- 1. CSP111 Electronics -->
+    <div class="course-wrap">
+      <div class="course-header" onclick="toggleCourse(this)">
+        <div class="course-header-left">
+          <div class="course-name-en">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/><path d="M19 12h3M2 12h3M12 19v3M12 2v3"/>
+            </svg>
+            Electronics
+          </div>
+          <div class="course-badges">
+            <span class="badge badge-primary">CSP111</span>
+            <span class="semester-chip">فصلي ①</span>
+            <span class="badge badge-warning">المستوى 1</span>
+          </div>
+        </div>
+        <div class="course-header-right">
+          <div class="score-label">إجمالي أعمال السنة</div>
+          <div class="score-value">
+            <span>0.00</span>
+            <span class="score-sep">/</span>
+            <span class="score-max">0.00</span>
+          </div>
+        </div>
+      </div>
+      <div class="status-row">
+        <span class="status-label-txt">الحالة الدراسية:</span>
+        <span class="badge badge-info">مستجد</span>
+      </div>
+      <div class="course-body">
+        <div class="empty-state">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p>لا توجد أعمال سنة مسجلة لهذا المقرر</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. CSP142 Programming Language I -->
+    <div class="course-wrap">
+      <div class="course-header" onclick="toggleCourse(this)">
+        <div class="course-header-left">
+          <div class="course-name-en">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
+              <polyline points="16 18 22 12 16 6"/>
+              <polyline points="8 6 2 12 8 18"/>
+            </svg>
+            Programming Language I
+          </div>
+          <div class="course-badges">
+            <span class="badge badge-primary">CSP142</span>
+            <span class="semester-chip">فصلي ①</span>
+            <span class="badge badge-warning">المستوى 1</span>
+          </div>
+        </div>
+        <div class="course-header-right">
+          <div class="score-label">إجمالي أعمال السنة</div>
+          <div class="score-value">
+            <span>0.00</span><span class="score-sep">/</span><span class="score-max">0.00</span>
+          </div>
+        </div>
+      </div>
+      <div class="status-row">
+        <span class="status-label-txt">الحالة الدراسية:</span>
+        <span class="badge badge-info">مستجد</span>
+      </div>
+      <div class="course-body">
+        <div class="empty-state">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p>لا توجد أعمال سنة مسجلة لهذا المقرر</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. DSP131 Principles of Information System -->
+    <div class="course-wrap">
+      <div class="course-header" onclick="toggleCourse(this)">
+        <div class="course-header-left">
+          <div class="course-name-en">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
+              <ellipse cx="12" cy="5" rx="9" ry="3"/>
+              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+            </svg>
+            Principles of Information System
+          </div>
+          <div class="course-badges">
+            <span class="badge badge-info">DSP131</span>
+            <span class="semester-chip">فصلي ①</span>
+            <span class="badge badge-warning">المستوى 1</span>
+          </div>
+        </div>
+        <div class="course-header-right">
+          <div class="score-label">إجمالي أعمال السنة</div>
+          <div class="score-value">
+            <span>0.00</span><span class="score-sep">/</span><span class="score-max">0.00</span>
+          </div>
+        </div>
+      </div>
+      <div class="status-row">
+        <span class="status-label-txt">الحالة الدراسية:</span>
+        <span class="badge badge-info">مستجد</span>
+      </div>
+      <div class="course-body">
+        <div class="empty-state">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p>لا توجد أعمال سنة مسجلة لهذا المقرر</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. GUR0C2c English Language 1 -->
+    <div class="course-wrap">
+      <div class="course-header" onclick="toggleCourse(this)">
+        <div class="course-header-left">
+          <div class="course-name-en">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            English Language 1
+          </div>
+          <div class="course-badges">
+            <span class="badge badge-primary">GUR0C2c</span>
+            <span class="semester-chip">فصلي ①</span>
+            <span class="badge badge-warning">المستوى 1</span>
+          </div>
+        </div>
+        <div class="course-header-right">
+          <div class="score-label">إجمالي أعمال السنة</div>
+          <div class="score-value">
+            <span>0.00</span><span class="score-sep">/</span><span class="score-max">0.00</span>
+          </div>
+        </div>
+      </div>
+      <div class="status-row">
+        <span class="status-label-txt">الحالة الدراسية:</span>
+        <span class="badge badge-info">مستجد</span>
+      </div>
+      <div class="course-body">
+        <div class="empty-state">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p>لا توجد أعمال سنة مسجلة لهذا المقرر</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. MAT103 Mathematics II -->
+    <div class="course-wrap">
+      <div class="course-header" onclick="toggleCourse(this)">
+        <div class="course-header-left">
+          <div class="course-name-en">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
+              <line x1="19" y1="5" x2="5" y2="19"/>
+              <circle cx="6.5" cy="6.5" r="2.5"/>
+              <circle cx="17.5" cy="17.5" r="2.5"/>
+            </svg>
+            Mathematics II
+          </div>
+          <div class="course-badges">
+            <span class="badge badge-primary">MAT103</span>
+            <span class="semester-chip">فصلي ②</span>
+            <span class="badge badge-warning">المستوى 1</span>
+          </div>
+        </div>
+        <div class="course-header-right">
+          <div class="score-label">إجمالي أعمال السنة</div>
+          <div class="score-value">
+            <span>0.00</span><span class="score-sep">/</span><span class="score-max">0.00</span>
+          </div>
+        </div>
+      </div>
+      <div class="status-row">
+        <span class="status-label-txt">الحالة الدراسية:</span>
+        <span class="badge badge-info">مستجد</span>
+      </div>
+      <div class="course-body">
+        <div class="empty-state">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p>لا توجد أعمال سنة مسجلة لهذا المقرر</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. MAT104 Probability and Statistics -->
+    <div class="course-wrap">
+      <div class="course-header" onclick="toggleCourse(this)">
+        <div class="course-header-left">
+          <div class="course-name-en">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6"  y1="20" x2="6"  y2="14"/>
+            </svg>
+            Probability and Statistics
+          </div>
+          <div class="course-badges">
+            <span class="badge badge-primary">MAT104</span>
+            <span class="semester-chip">فصلي ②</span>
+            <span class="badge badge-warning">المستوى 1</span>
+          </div>
+        </div>
+        <div class="course-header-right">
+          <div class="score-label">إجمالي أعمال السنة</div>
+          <div class="score-value">
+            <span>0.00</span><span class="score-sep">/</span><span class="score-max">0.00</span>
+          </div>
+        </div>
+      </div>
+      <div class="status-row">
+        <span class="status-label-txt">الحالة الدراسية:</span>
+        <span class="badge badge-info">مستجد</span>
+      </div>
+      <div class="course-body">
+        <div class="empty-state">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p>لا توجد أعمال سنة مسجلة لهذا المقرر</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="app-footer">
+    جامعة شرق بورسعيد الأهلية Copyright © 2026 — جميع الحقوق محفوظة
+  </footer>
+
+  <script>
+    function toggleCourse(header) {
+      const body = header.closest('.course-wrap').querySelector('.course-body');
+      if (!body) return;
+      body.style.display = body.style.display === 'none' ? '' : 'none';
+    }
+  </script>
+
+  <script src="js/sidebar.js"></script>
+  <script src="js/topbar.js"></script>
+  <script src="js/unihub.js"></script>
+</body>
+</html>
+

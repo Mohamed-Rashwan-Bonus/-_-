@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>محاضراتي | UniHub — EPNU</title>
+  <meta name="description" content="محاضراتي — تصفح وتحميل محاضرات مقرراتك الدراسية" />
+  <link rel="stylesheet" href="css/neu-system.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <style>
+
+    /* ── Search bar ── */
+    .lec-search-wrap { position: relative; margin-bottom: 24px; }
+    .lec-search {
+      width: 100%;
+      background: var(--surface);
+      border: none;
+      border-radius: var(--radius-pill);
+      box-shadow: var(--neu-pressed-sm);
+      padding: 12px 48px 12px 20px;
+      font-size: 13.5px;
+      color: var(--text);
+      font-family: var(--font);
+      outline: none;
+      transition: var(--transition);
+    }
+    .lec-search:focus { box-shadow: var(--neu-pressed), 0 0 0 3px rgba(0,85,164,0.12); }
+    .lec-search-icon {
+      position: absolute;
+      left: 18px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    /* ── Section bar ── */
+    .section-bar {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: var(--radius) var(--radius) 0 0;
+      font-size: 14px; font-weight: 700;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .section-bar-left { display: flex; align-items: center; gap: 10px; }
+    .section-badge {
+      background: rgba(255,255,255,0.2);
+      padding: 3px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 11.5px;
+    }
+    .neu-card {
+      background: var(--surface);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    /* ── Courses Grid ── */
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 14px;
+      padding: 20px;
+    }
+    .course-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      padding: 18px 16px;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 2px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+    .course-card::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 4px; height: 100%;
+      opacity: 0.7;
+      transition: var(--transition);
+    }
+    .course-card:hover { box-shadow: var(--neu-raised-lg); transform: translateY(-3px); }
+    .course-card.active {
+      border-color: var(--primary);
+      box-shadow: var(--neu-raised-lg), 0 0 0 2px rgba(0,85,164,0.15);
+    }
+    .course-card.active::before { width: 100%; opacity: 0.04; background: var(--primary); }
+
+    /* Accent strip per dept — defines --course-accent per class */
+    .acc-mat    { --course-accent: #d97706; background: #d97706; }
+    .acc-csp    { --course-accent: #4f46e5; background: #4f46e5; }
+    .acc-dsp    { --course-accent: #059669; background: #059669; }
+    .acc-gur    { --course-accent: #7c3aed; background: #7c3aed; }
+    .acc-phy    { --course-accent: #dc2626; background: #dc2626; }
+
+    .course-card::before { background: var(--course-accent, var(--primary)); }
+
+    .cc-code {
+      font-size: 10.5px; font-weight: 800;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+    .cc-name { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.4; margin-bottom: 6px; }
+    .cc-count { font-size: 11.5px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+
+    /* ── Lectures area ── */
+    .lectures-header {
+      display: flex; align-items: center;
+      justify-content: space-between; flex-wrap: wrap;
+      gap: 10px; padding: 20px 20px 0;
+    }
+    .active-course-tag {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 700; color: var(--primary);
+    }
+
+    /* Empty state */
+    .lec-empty {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 60px 24px;
+      text-align: center;
+    }
+    .lec-empty-icon {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: var(--surface);
+      box-shadow: var(--neu-raised);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 18px;
+      animation: floatIcon 3s ease-in-out infinite;
+    }
+    @keyframes floatIcon {
+      0%,100% { transform:translateY(0); }
+      50%      { transform:translateY(-8px); }
+    }
+    .lec-empty h3  { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .lec-empty p   { font-size: 13px; color: var(--text-muted); max-width: 340px; line-height: 1.7; }
+
+    /* Lecture card (for when lectures exist — hidden now) */
+    .lec-card {
+      display: none; /* will be shown when data exists */
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    .lec-card:hover { box-shadow: var(--neu-raised-lg); transform: translateY(-2px); }
+
+    /* Stats row */
+    .stats-row {
+      display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;
+    }
+    .stat-pill {
+      background: var(--surface);
+      border-radius: var(--radius-pill);
+      box-shadow: var(--neu-flat);
+      padding: 6px 16px;
+      font-size: 12.5px; font-weight: 600;
+      color: var(--text-muted);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .stat-pill span { color: var(--primary); font-weight: 800; }
+
+    /* ── hide cards on search ── */
+    .course-card.hidden { display: none; }
+
+    /* ── Dark Mode: course code badges ── */
+    html.dark-theme .cc-code { background: rgba(255,255,255,0.07) !important; color: var(--text-muted) !important; }
+    html.dark-theme .course-card.active .cc-code { color: var(--primary-light) !important; }
+    html.dark-theme .lec-empty-icon { box-shadow: var(--neu-pressed); }
+  </style>
+</head>
+<body>
+  <div id="sidebar-mount"></div>
+  <div id="topbar-mount"></div>
+
+  <main class="main-content">
+    <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">محاضراتي</h1>
+    
+
+    <!-- ── Page Header ── -->
+    <div class="page-header">
+      <div class="page-title">محاضراتي</div>
+      <div class="page-subtitle">تصفح وتحميل محاضرات مقرراتك الدراسية</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-pill">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="23 7 16 12 23 17 23 7"/>
+          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+        </svg>
+        المقررات: <span>12</span>
+      </div>
+      <div class="stat-pill">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        المحاضرات المتاحة: <span>0</span>
+      </div>
+    </div>
+
+    <!-- ── Search ── -->
+    <div class="lec-search-wrap">
+      <input type="text" class="lec-search" id="course-search"
+        placeholder="ابحث في المقررات..." oninput="searchCourses()" />
+      <svg class="lec-search-icon" width="16" height="16" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </div>
+
+    <!-- ══════════════════════
+         COURSES SECTION
+         ══════════════════════ -->
+    <div class="section-bar">
+      <div class="section-bar-left">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        المقررات
+      </div>
+      <span class="section-badge" id="course-count-badge">12 مقرر</span>
+    </div>
+    <div class="neu-card">
+      <div class="courses-grid" id="courses-grid">
+
+        <!-- MAT104 -->
+        <div class="course-card" data-code="MAT104" data-name="احتمالات و إحصاء" onclick="selectCourse(this)">
+          <div class="course-card::before acc-mat"></div>
+          <div class="cc-code" style="background:rgba(217,119,6,0.1);color:#b45309">MAT104</div>
+          <div class="cc-name">احتمالات و إحصاء</div>
+          <div class="cc-count">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+            </svg>
+            0 محاضرات
+          </div>
+        </div>
+
+        <!-- CSP111 -->
+        <div class="course-card" data-code="CSP111" data-name="الإلكترونيات" onclick="selectCourse(this)">
+          <div class="cc-code" style="background:rgba(0,85,164,0.1);color:var(--primary)">CSP111</div>
+          <div class="cc-name">الإلكترونيات</div>
+          <div class="cc-count">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+            </svg>
+            0 محاضرات
+          </div>
+        </div>
+
+        <!-- GUR0C2c -->
+        <div class="course-card" data-code="GUR0C2c" data-name="اللغة الإنجليزية 1" onclick="selectCourse(this)">
+          <div class="cc-code" style="background:rgba(124,58,237,0.1);color:#7c3aed">GUR0C2c</div>
+          <div class="cc-name">اللغة الإنجليزية 1</div>
+          <div class="cc-count">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+            </svg>
+            0 محاضرات
+          </div>
+        </div>
+
+        <!-- CSP142 -->
+        <div class="course-card" data-code="CSP142" data-name="برمجة 1" onclick="selectCourse(this)">
+          <div class="cc-code" style="background:rgba(99,102,241,0.1);color:#6366f1">CSP142</div>
+          <div class="cc-name">برمجة 1</div>
+          <div class="cc-count">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+            </svg>
+            0 محاضرات
+          </div>
+        </div>
+
+        <!-- MAT101 -->
+        <div class="course-card" data-code="MAT101" data-name="رياضيات 1" onclick="selectCourse(this)">
+          <div class="cc-code" style="background:rgba(217,119,6,0.1);color:#b45309">MAT101</div>
+          <div class="cc-name">رياضيات 1</div>
+          <div class="cc-count">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+            </svg>
+            0 محاضرات
+          </div>
+        </div>
+
+        <!-- MAT103 -->
+        <div class="course-card" data-code="MAT103" data-name="رياضيات 2" onclick="selectCourse(this)">
+          <div class="cc-code" style="background:rgba(217,119,6,0.1);color:#b45309">MAT103</div>
+          <div class="cc-name">رياضيات 2</div>
+          <div class="cc-count">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+            </svg>
+            0 محاضرات
+          </div>
+        </div>
+
+        <!-- MAT102 -->
+        <div class="course-card" data-code="MAT102" data-name="رياضيات متقطعة" onclick="selectCourse(this)">
+          <div class="cc-code" style="background:rgba(217,119,6,0.1);color:#b45309">MAT102</div>
+          <div class="cc-name">رياضيات متقطعة</div>
+          <div class="cc-count">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+            </svg>
+            0 محاضرات
+          </div>
+        </div>
+
+        <!-- PHY101 -->
+        <div class="course-card" data-code="PHY101" data-name="فيزياء 1" onclick="selectCourse(this)">
+          <div class="cc-code" style="background:rgba(220,38,38,0.1);color:#dc2626">PHY101</div>
+          <div class="cc-name">فيزياء 1</div>
+          <div class="cc-count">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+            </svg>
+            0 محاضرات
+          </div>
+        </div>
+
+        <!-- DSP131 -->
+        <div class="course-card" data-code="DSP131" data-name="مبادئ أنظمة المعلومات" onclick="selectCourse(this)">
+          <div class="cc-code" style="background:rgba(5,150,105,0.1);color:#059669">DSP131</div>
+          <div class="cc-name">مبادئ أنظمة المعلومات</div>
+          <div class="cc-count">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+            </svg>
+            0 محاضرات
+          </div>
+        </div>
+
+        <!-- GUR0C1 -->
+        <div class="course-card" data-code="GUR0C1" data-name="مبادئ القانون وحقوق الإنسان" onclick="selectCourse(this)">
+          <div class="cc-code" style="background:rgba(124,58,237,0.1);color:#7c3aed">GUR0C1</div>
+          <div class="cc-name">مبادئ القانون وحقوق الإنسان</div>
+          <div class="cc-count">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+            </svg>
+            0 محاضرات
+          </div>
+        </div>
+
+        <!-- CSP141 -->
+        <div class="course-card" data-code="CSP141" data-name="مقدمة في البرمجة" onclick="selectCourse(this)">
+          <div class="cc-code" style="background:rgba(99,102,241,0.1);color:#6366f1">CSP141</div>
+          <div class="cc-name">مقدمة في البرمجة</div>
+          <div class="cc-count">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+            </svg>
+            0 محاضرات
+          </div>
+        </div>
+
+        <!-- CSP101 -->
+        <div class="course-card" data-code="CSP101" data-name="مقدمة في علوم الحاسب" onclick="selectCourse(this)">
+          <div class="cc-code" style="background:rgba(0,85,164,0.1);color:var(--primary)">CSP101</div>
+          <div class="cc-name">مقدمة في علوم الحاسب</div>
+          <div class="cc-count">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+            </svg>
+            0 محاضرات
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════
+         LECTURES SECTION
+         ══════════════════════ -->
+    <div class="section-bar">
+      <div class="section-bar-left">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="23 7 16 12 23 17 23 7"/>
+          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+        </svg>
+        المحاضرات المتاحة
+      </div>
+      <span class="section-badge" id="active-course-label">اختر مقرراً</span>
+    </div>
+    <div class="neu-card">
+      <!-- Empty state -->
+      <div class="lec-empty" id="lectures-empty">
+        <div class="lec-empty-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
+            stroke="var(--primary)" stroke-width="1.5" style="opacity:0.6">
+            <polygon points="23 7 16 12 23 17 23 7"/>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+          </svg>
+        </div>
+        <h3>لا توجد محاضرات متاحة</h3>
+        <p id="empty-sub-msg">
+          لم يتم رفع أي محاضرات حتى الآن. اختر مقرراً من فوق أو انتظري حتى يرفع الأستاذ المحاضرات.
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="app-footer">
+    جامعة شرق بورسعيد الأهلية Copyright © 2026 — جميع الحقوق محفوظة
+  </footer>
+
+  <script>
+    let selectedCourse = null;
+
+    /* ── Select course ── */
+    function selectCourse(card) {
+      document.querySelectorAll('.course-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      selectedCourse = card.dataset.code;
+      const name = card.dataset.name;
+      document.getElementById('active-course-label').textContent = `${name} — ${selectedCourse}`;
+      document.getElementById('empty-sub-msg').textContent =
+        `لا توجد محاضرات مرفوعة لمقرر "${name}" حتى الآن. ستظهر هنا فور إضافتها.`;
+    }
+
+    /* ── Search courses ── */
+    function searchCourses() {
+      const q = document.getElementById('course-search').value.toLowerCase();
+      let visible = 0;
+      document.querySelectorAll('.course-card').forEach(card => {
+        const match = !q ||
+          card.dataset.code.toLowerCase().includes(q) ||
+          card.dataset.name.toLowerCase().includes(q);
+        card.classList.toggle('hidden', !match);
+        if (match) visible++;
+      });
+      document.getElementById('course-count-badge').textContent = `${visible} مقرر`;
+    }
+  </script>
+
+  <script src="js/sidebar.js"></script>
+  <script src="js/topbar.js"></script>
+  <script src="js/unihub.js"></script>
+</body>
+</html>

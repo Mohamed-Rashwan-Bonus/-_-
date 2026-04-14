@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تفاصيل الغياب | UniHub — EPNU</title>
+  <meta name="description" content="سجل الغيابات الدراسية — عرض تفصيلي لغياباتك ومواعيدها لكل مقرر دراسي" />
+  <link rel="stylesheet" href="css/neu-system.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <style>
+
+    /* ── Info banner ── */
+    .info-banner {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      padding: 18px 22px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .info-banner-icon {
+      width: 40px; height: 40px;
+      border-radius: var(--radius);
+      background: rgba(0,85,164,0.08);
+      box-shadow: var(--neu-pressed-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      color: var(--primary);
+    }
+    .info-banner-title { font-size: 13.5px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .info-banner ul    { margin: 0; padding-right: 18px; }
+    .info-banner li    { font-size: 12.5px; color: var(--text-muted); margin-bottom: 4px; }
+    .info-banner li:last-child { margin-bottom: 0; }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .filter-btn {
+      background: var(--surface);
+      border: none;
+      border-radius: var(--radius-pill);
+      box-shadow: var(--neu-raised-sm);
+      padding: 7px 16px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: var(--font);
+      transition: var(--transition);
+    }
+    .filter-btn:hover   { box-shadow: var(--neu-raised); color: var(--primary); }
+    .filter-btn.active  {
+      box-shadow: var(--neu-pressed-sm);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    /* ── Section bar ── */
+    .section-bar {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: var(--radius) var(--radius) 0 0;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 0;
+    }
+    .section-bar-left { display: flex; align-items: center; gap: 10px; }
+    .section-bar-right { font-size: 12px; opacity: 0.85; }
+
+    .neu-card {
+      background: var(--surface);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    /* ── Course row in table ── */
+    thead th {
+      background: var(--surface);
+      box-shadow: inset 0 -2px 0 rgba(0,65,130,0.1);
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding: 12px 16px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 13px 16px;
+      font-size: 13px;
+      color: var(--text);
+      text-align: center;
+      border-bottom: 1px solid rgba(0,65,130,0.06);
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td      { background: rgba(0,85,164,0.025); }
+
+    /* ── Empty state (per-course) ── */
+    .empty-row td {
+      padding: 28px 16px;
+      color: var(--text-light);
+      font-size: 13px;
+    }
+    .empty-icon-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--text-light);
+    }
+    .empty-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(0,65,130,0.12);
+    }
+
+    /* ── Summary cards ── */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .summary-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      padding: 16px 12px;
+      text-align: center;
+      transition: var(--transition);
+      cursor: default;
+    }
+    .summary-card:hover { box-shadow: var(--neu-raised-lg); transform: translateY(-2px); }
+    .sc-code {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--primary);
+      background: rgba(0,85,164,0.08);
+      border-radius: var(--radius-pill);
+      padding: 3px 8px;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    .sc-name  { font-size: 11px; color: var(--text-muted); line-height: 1.3; margin-bottom: 8px; }
+    .sc-count { font-size: 1.4rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .sc-lbl   { font-size: 10.5px; color: var(--text-light); margin-top: 3px; }
+
+    @media (max-width: 900px) { .summary-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 580px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    /* ── Overflowing table ── */
+    .table-wrap  { overflow-x: auto; }
+    .abs-table   { width: 100%; border-collapse: collapse; }
+    .abs-table thead th:first-child { text-align: right; }
+    .abs-table tbody td:first-child { text-align: right; }
+
+    /* ── Course name cell ── */
+    .course-cell { text-align: right !important; }
+    .course-en   { font-weight: 700; color: var(--text); font-size: 13px; }
+    .course-code { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── Absent badge ── */
+    .badge-absent  { background:rgba(255,33,87,.1);  color:var(--danger);  padding:3px 12px; border-radius:var(--radius-pill); font-size:11.5px; font-weight:700; }
+    .badge-present { background:rgba(0,166,61,.1);   color:var(--success); padding:3px 12px; border-radius:var(--radius-pill); font-size:11.5px; font-weight:700; }
+    .badge-empty   { background:rgba(0,0,0,.06);     color:var(--text-light); padding:3px 12px; border-radius:var(--radius-pill); font-size:11.5px; font-weight:600; }
+  </style>
+</head>
+<body>
+  <div id="sidebar-mount"></div>
+  <div id="topbar-mount"></div>
+
+  <main class="main-content">
+    <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">تفاصيل الغياب الدراسي</h1>
+    
+
+    <!-- ── Page Header ── -->
+    <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div>
+        <div class="page-title">تفاصيل الغياب</div>
+        <div class="page-subtitle">الفصل الدراسي الثاني — 2025/2026</div>
+      </div>
+      <button class="filter-btn" onclick="history.back()">
+        ← عودة
+      </button>
+    </div>
+
+    <!-- ── Info Banner ── -->
+    <div class="info-banner">
+      <div class="info-banner-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div>
+        <div class="info-banner-title">معلومات هامة</div>
+        <ul>
+          <li>يعرض الجدول أدناه جميع مقررات هذا الفصل الدراسي مع أحدث الأنشطة المسجّلة لكل مقرر.</li>
+          <li>المقررات المعروضة تخص العام والفصل الدراسيين الحاليين فقط.</li>
+          <li>تجاوز نسبة الغياب <strong>25%</strong> من إجمالي الجلسات يؤدي إلى الحرمان من الامتحان.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ── Summary mini-cards ── -->
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="sc-code">CSP111</div>
+        <div class="sc-name">Electronics</div>
+        <div class="sc-count">0</div>
+        <div class="sc-lbl">غيابات</div>
+      </div>
+      <div class="summary-card">
+        <div class="sc-code">GUR0C2c</div>
+        <div class="sc-name">English Language 1</div>
+        <div class="sc-count">0</div>
+        <div class="sc-lbl">غيابات</div>
+      </div>
+      <div class="summary-card">
+        <div class="sc-code">MAT103</div>
+        <div class="sc-name">Mathematics II</div>
+        <div class="sc-count">0</div>
+        <div class="sc-lbl">غيابات</div>
+      </div>
+      <div class="summary-card">
+        <div class="sc-code">DSP131</div>
+        <div class="sc-name">Principles of Info. System</div>
+        <div class="sc-count">0</div>
+        <div class="sc-lbl">غيابات</div>
+      </div>
+      <div class="summary-card">
+        <div class="sc-code">MAT104</div>
+        <div class="sc-name">Probability & Statistics</div>
+        <div class="sc-count">0</div>
+        <div class="sc-lbl">غيابات</div>
+      </div>
+      <div class="summary-card">
+        <div class="sc-code">CSP142</div>
+        <div class="sc-name">Programming Language I</div>
+        <div class="sc-count">0</div>
+        <div class="sc-lbl">غيابات</div>
+      </div>
+    </div>
+
+    <!-- ── Filter ── -->
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterCourse('all', this)">الكل</button>
+      <button class="filter-btn" onclick="filterCourse('CSP111',  this)">CSP111</button>
+      <button class="filter-btn" onclick="filterCourse('GUR0C2c', this)">GUR0C2c</button>
+      <button class="filter-btn" onclick="filterCourse('MAT103',  this)">MAT103</button>
+      <button class="filter-btn" onclick="filterCourse('DSP131',  this)">DSP131</button>
+      <button class="filter-btn" onclick="filterCourse('MAT104',  this)">MAT104</button>
+      <button class="filter-btn" onclick="filterCourse('CSP142',  this)">CSP142</button>
+    </div>
+
+    <!-- ── Main Table ── -->
+    <div class="section-bar">
+      <div class="section-bar-left">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        سجل الغياب التفصيلي
+      </div>
+      <div class="section-bar-right">6 مقررات — الفصل الثاني</div>
+    </div>
+    <div class="neu-card">
+      <div class="table-wrap">
+        <table class="abs-table">
+          <thead>
+            <tr>
+              <th scope="col" style="text-align:right;padding-right:20px">المقرر</th>
+              <th scope="col">نوع النشاط</th>
+              <th scope="col">رقم الأسبوع</th>
+              <th scope="col">تاريخ النشاط</th>
+              <th scope="col">وقت النشاط</th>
+              <th scope="col">حالة الحضور</th>
+            </tr>
+          </thead>
+          <tbody id="abs-tbody">
+
+            <!-- CSP111 -->
+            <tr class="abs-row" data-course="CSP111">
+              <td class="course-cell" style="text-align:right;padding-right:20px">
+                <div class="course-en">Electronics</div>
+                <div class="course-code">CSP111</div>
+              </td>
+              <td colspan="5">
+                <div class="empty-icon-wrap">
+                  <div class="empty-dot"></div>
+                  <span>لا يوجد أنشطة مسجّلة</span>
+                  <div class="empty-dot"></div>
+                </div>
+              </td>
+            </tr>
+
+            <!-- GUR0C2c -->
+            <tr class="abs-row" data-course="GUR0C2c">
+              <td class="course-cell" style="text-align:right;padding-right:20px">
+                <div class="course-en">English Language 1</div>
+                <div class="course-code">GUR0C2c</div>
+              </td>
+              <td colspan="5">
+                <div class="empty-icon-wrap">
+                  <div class="empty-dot"></div>
+                  <span>لا يوجد أنشطة مسجّلة</span>
+                  <div class="empty-dot"></div>
+                </div>
+              </td>
+            </tr>
+
+            <!-- MAT103 -->
+            <tr class="abs-row" data-course="MAT103">
+              <td class="course-cell" style="text-align:right;padding-right:20px">
+                <div class="course-en">Mathematics II</div>
+                <div class="course-code">MAT103</div>
+              </td>
+              <td colspan="5">
+                <div class="empty-icon-wrap">
+                  <div class="empty-dot"></div>
+                  <span>لا يوجد أنشطة مسجّلة</span>
+                  <div class="empty-dot"></div>
+                </div>
+              </td>
+            </tr>
+
+            <!-- DSP131 -->
+            <tr class="abs-row" data-course="DSP131">
+              <td class="course-cell" style="text-align:right;padding-right:20px">
+                <div class="course-en">Principles of Information System</div>
+                <div class="course-code">DSP131</div>
+              </td>
+              <td colspan="5">
+                <div class="empty-icon-wrap">
+                  <div class="empty-dot"></div>
+                  <span>لا يوجد أنشطة مسجّلة</span>
+                  <div class="empty-dot"></div>
+                </div>
+              </td>
+            </tr>
+
+            <!-- MAT104 -->
+            <tr class="abs-row" data-course="MAT104">
+              <td class="course-cell" style="text-align:right;padding-right:20px">
+                <div class="course-en">Probability and Statistics</div>
+                <div class="course-code">MAT104</div>
+              </td>
+              <td colspan="5">
+                <div class="empty-icon-wrap">
+                  <div class="empty-dot"></div>
+                  <span>لا يوجد أنشطة مسجّلة</span>
+                  <div class="empty-dot"></div>
+                </div>
+              </td>
+            </tr>
+
+            <!-- CSP142 -->
+            <tr class="abs-row" data-course="CSP142">
+              <td class="course-cell" style="text-align:right;padding-right:20px">
+                <div class="course-en">Programming Language I</div>
+                <div class="course-code">CSP142</div>
+              </td>
+              <td colspan="5">
+                <div class="empty-icon-wrap">
+                  <div class="empty-dot"></div>
+                  <span>لا يوجد أنشطة مسجّلة</span>
+                  <div class="empty-dot"></div>
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Global empty notice ── -->
+    <div class="alert alert-info" style="margin-top:-12px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" style="flex-shrink:0">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      لم يتم تسجيل أي أنشطة حضور بعد لهذا الفصل الدراسي. ستظهر البيانات فور بدء الأستاذ تسجيل الجلسات.
+    </div>
+
+  </main>
+
+  <footer class="app-footer">
+    جامعة شرق بورسعيد الأهلية Copyright © 2026 — جميع الحقوق محفوظة
+  </footer>
+
+  <script>
+    function filterCourse(code, btn) {
+      // Update active button
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      // Filter rows
+      document.querySelectorAll('.abs-row').forEach(row => {
+        row.style.display = (code === 'all' || row.dataset.course === code) ? '' : 'none';
+      });
+    }
+  </script>
+
+  <script src="js/sidebar.js"></script>
+  <script src="js/topbar.js"></script>
+  <script src="js/unihub.js"></script>
+</body>
+</html>

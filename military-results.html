@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نتائج التربية العسكرية | UniHub — EPNU</title>
+  <meta name="description" content="نتائج التربية العسكرية — درجات ومسار التربية العسكرية للطالب" />
+  <link rel="stylesheet" href="css/neu-system.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <style>
+    /* ── Hero empty state ── */
+    .mil-hero {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      padding: 56px 32px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .mil-shield {
+      width: 90px; height: 90px;
+      border-radius: 50%;
+      background: var(--surface);
+      box-shadow: var(--neu-raised);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      animation: floatShield 3s ease-in-out infinite;
+    }
+    @keyframes floatShield {
+      0%,100% { transform: translateY(0);    box-shadow: var(--neu-raised-lg); }
+      50%      { transform: translateY(-8px); box-shadow: var(--neu-raised); }
+    }
+    .mil-hero-title { font-size: 1.4rem; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+    .mil-hero-sub   { font-size: 14px; color: var(--text-muted); max-width: 460px; margin: 0 auto 28px; line-height: 1.7; }
+
+    /* ── Info cards grid ── */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .info-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      padding: 22px 18px;
+      text-align: center;
+      transition: var(--transition);
+    }
+    .info-card:hover { box-shadow: var(--neu-raised-lg); transform: translateY(-3px); }
+    .info-card-icon {
+      width: 48px; height: 48px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--neu-pressed-sm);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px;
+    }
+    .info-card-title { font-size: 13.5px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .info-card-sub   { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+    @media (max-width: 768px) { .info-grid { grid-template-columns: 1fr; } }
+
+    /* ── Section bar ── */
+    .section-bar {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: var(--radius) var(--radius) 0 0;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .neu-card {
+      background: var(--surface);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    /* ── Empty table-like state ── */
+    .empty-table-state {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 48px 24px;
+      gap: 12px;
+    }
+    .empty-table-icon {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: var(--surface);
+      box-shadow: var(--neu-pressed);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0.6;
+    }
+    .empty-table-title { font-size: 14px; font-weight: 700; color: var(--text-muted); }
+    .empty-table-sub   { font-size: 12.5px; color: var(--text-light); text-align: center; max-width: 340px; }
+
+    /* ── Status Step tracker ── */
+    .steps-track {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 0;
+      padding: 24px;
+      position: relative;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .step-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: -50%;
+      right: -50%;
+      height: 2px;
+      background: var(--surface);
+      box-shadow: var(--neu-pressed-sm);
+      z-index: -1;
+    }
+    .step-circle {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--surface);
+      box-shadow: var(--neu-pressed-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      transition: var(--transition);
+    }
+    .step-circle.done {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(0,85,164,0.3);
+    }
+    .step-circle.pending {
+      color: var(--text-light);
+    }
+    .step-label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+    .step-sub   { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+
+    @media (max-width: 640px) {
+      .steps-track {
+        flex-wrap: wrap;
+        justify-content: space-around;
+        gap: 20px;
+        padding: 20px 12px;
+      }
+      .step-item {
+        flex: 0 0 calc(50% - 20px);
+      }
+      /* Hide the connector line on wrap */
+      .step-item:not(:last-child)::after { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar-mount"></div>
+  <div id="topbar-mount"></div>
+
+  <main class="main-content">
+    <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">نتائج التربية العسكرية</h1>
+    
+
+    <!-- ── Page Header ── -->
+    <div class="page-header">
+      <div class="page-title">نتائج التربية العسكرية</div>
+      <div class="page-subtitle">درجات ونتائج دورات التربية العسكرية</div>
+    </div>
+
+    <!-- ── Hero ── -->
+    <div class="mil-hero">
+      <div class="mil-shield">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none"
+          stroke="var(--primary)" stroke-width="1.5">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <div class="mil-hero-title">لا توجد نتائج تربية عسكرية بعد</div>
+      <div class="mil-hero-sub">
+        لم تُسجَّل أي نتائج للتربية العسكرية حتى الآن.
+        لظهور نتائجك هنا، يجب أولاً إتمام تسجيل وحضور دورة التربية العسكرية.
+      </div>
+      <a href="military.html" class="btn btn-primary btn-sm">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        اذهب لصفحة الحجز
+      </a>
+    </div>
+
+    <!-- ── Progress Steps ── -->
+    <div class="section-bar">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      حالة مسار التربية العسكرية
+    </div>
+    <div class="neu-card">
+      <div class="steps-track">
+        <!-- Step 1 - Done (registered in system) -->
+        <div class="step-item">
+          <div class="step-circle done">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="step-label">القيد</div>
+          <div class="step-sub">مسجّل بالكلية</div>
+        </div>
+        <!-- Step 2 - Pending -->
+        <div class="step-item">
+          <div class="step-circle pending">2</div>
+          <div class="step-label">حجز الدورة</div>
+          <div class="step-sub">لم يتم بعد</div>
+        </div>
+        <!-- Step 3 - Pending -->
+        <div class="step-item">
+          <div class="step-circle pending">3</div>
+          <div class="step-label">الحضور</div>
+          <div class="step-sub">في انتظار الحجز</div>
+        </div>
+        <!-- Step 4 - Pending -->
+        <div class="step-item">
+          <div class="step-circle pending">4</div>
+          <div class="step-label">النتيجة</div>
+          <div class="step-sub">لم تُسجَّل بعد</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Info grid (what does good result look like) ── -->
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-card-icon" style="color:var(--primary)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div class="info-card-title">الدرجة الكلية</div>
+        <div class="info-card-sub">تُحتسب النتيجة من 100 درجة بعد إتمام الدورة والاختبار النهائي.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon" style="color:var(--success)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 11 12 14 22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+        </div>
+        <div class="info-card-title">شرط النجاح</div>
+        <div class="info-card-sub">الحصول على 50% أو أكثر من الدرجة الكلية للحصول على تقدير مقبول.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon" style="color:var(--warning)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <div class="info-card-title">متطلب التخرج</div>
+        <div class="info-card-sub">اجتياز التربية العسكرية شرط إلزامي للتخرج من الجامعة.</div>
+      </div>
+    </div>
+
+    <!-- ── Empty results table ── -->
+    <div class="section-bar">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+      سجل النتائج
+    </div>
+    <div class="neu-card">
+      <div class="empty-table-state">
+        <div class="empty-table-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+            stroke="var(--text-light)" stroke-width="1.5">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        </div>
+        <div class="empty-table-title">لا توجد نتائج مسجّلة</div>
+        <div class="empty-table-sub">ستظهر نتائجك هنا فور صدورها بعد إتمام دورة التربية العسكرية والتصحيح من قِبَل الإدارة.</div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="app-footer">
+    جامعة شرق بورسعيد الأهلية Copyright © 2026 — جميع الحقوق محفوظة
+  </footer>
+
+  <script src="js/sidebar.js"></script>
+  <script src="js/topbar.js"></script>
+  <script src="js/unihub.js"></script>
+</body>
+</html>

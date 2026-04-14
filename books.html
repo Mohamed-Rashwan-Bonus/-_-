@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>منصة الكتب | UniHub — EPNU</title>
+  <meta name="description" content="منصة الكتب — تحميل كتب المقررات الدراسية من المكتبة الرقمية" />
+  <link rel="stylesheet" href="css/neu-system.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <style>
+    /* ── Page layout: sidebar + grid ── */
+    .library-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 840px) { .library-layout { grid-template-columns: 1fr; } }
+
+    /* ── Course Filter Sidebar ── */
+    .course-sidebar {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      overflow: hidden;
+      position: sticky;
+      top: 84px;
+    }
+    .course-sidebar-header {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 16px;
+      font-size: 13.5px;
+      font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .course-filter-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 16px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(0,65,130,0.05);
+      transition: var(--transition);
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: right;
+      font-family: var(--font);
+    }
+    .course-filter-item:last-child { border-bottom: none; }
+    .course-filter-item:hover   { background:rgba(0,85,164,0.04); color:var(--primary); }
+    .course-filter-item.active  {
+      background: rgba(0,85,164,0.08);
+      color: var(--primary);
+      font-weight: 700;
+      box-shadow: inset 3px 0 0 var(--primary);
+    }
+    .cfi-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .cfi-code {
+      font-size: 10.5px;
+      color: var(--text-light);
+      font-weight: 600;
+      margin-top: 1px;
+    }
+
+    /* Mobile: filter chips */
+    .filter-chips {
+      display: none;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 840px) {
+      .filter-chips   { display: flex; }
+      .course-sidebar { display: none; }
+    }
+    .chip {
+      background: var(--surface);
+      border-radius: var(--radius-pill);
+      box-shadow: var(--neu-raised-sm);
+      padding: 6px 14px;
+      font-size: 12px; font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      font-family: var(--font);
+    }
+    .chip:hover  { box-shadow:var(--neu-raised); color:var(--primary); }
+    .chip.active { box-shadow:var(--neu-pressed-sm); color:var(--primary); font-weight:700; }
+
+    /* ── Search bar ── */
+    .lib-search-wrap {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .lib-search {
+      width: 100%;
+      background: var(--surface);
+      border: none;
+      border-radius: var(--radius-pill);
+      box-shadow: var(--neu-pressed-sm);
+      padding: 11px 18px 11px 44px; /* RTL: icon right:16px → left side gets the icon padding */
+      font-size: 13.5px;
+      color: var(--text);
+      font-family: var(--font);
+      outline: none;
+      transition: var(--transition);
+    }
+    .lib-search:focus { box-shadow:var(--neu-pressed), 0 0 0 3px rgba(0,85,164,0.12); }
+    .lib-search-icon {
+      position: absolute;
+      right: 16px; top: 50%; /* RTL: icon on the right */
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* ── Stats strip ── */
+    .stats-strip {
+      display: flex; gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .stat-pill {
+      background: var(--surface);
+      border-radius: var(--radius-pill);
+      box-shadow: var(--neu-flat);
+      padding: 6px 16px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .stat-pill span { color: var(--primary); font-weight: 800; }
+
+    /* ── Book cards grid ── */
+    .books-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .book-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      overflow: hidden;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+    .book-card:hover {
+      box-shadow: var(--neu-raised-lg);
+      transform: translateY(-4px);
+    }
+
+    /* Book spine accent */
+    .book-cover {
+      height: 130px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .book-cover-icon {
+      width: 64px; height: 64px;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .book-body { padding: 14px 14px 0; flex: 1; }
+    .book-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .book-meta { font-size: 11.5px; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items:center; gap:4px; }
+    .book-course-badge {
+      display: inline-block;
+      background: rgba(0,85,164,0.08);
+      color: var(--primary);
+      border-radius: var(--radius-pill);
+      padding: 2px 10px;
+      font-size: 10.5px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .book-footer { padding: 12px 14px; }
+    .dl-btn {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-pill);
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: var(--transition);
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      text-decoration: none;
+    }
+    .dl-btn:hover { background: var(--primary-dark); box-shadow: 0 4px 14px rgba(0,85,164,.3); color:#fff; }
+    .dl-btn:active { transform: scale(0.97); }
+
+    /* Colors per course */
+    .bc-csp111  { background: linear-gradient(135deg, #0055A4 0%, #003f7e 100%); }
+    .bc-csp142  { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); }
+    .bc-dsp131  { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
+    .bc-mat103  { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); }
+    .bc-mat104  { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); }
+    .bc-gur0c2c { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
+
+    /* No results */
+    .no-results {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 48px 24px;
+    }
+    .no-results p { font-size: 14px; color: var(--text-muted); margin-top: 12px; }
+
+    /* ── Dark Mode overrides ── */
+    html.dark-theme .bc-csp111  { background: linear-gradient(135deg, #003f7e 0%, #002654 100%); }
+    html.dark-theme .bc-csp142  { background: linear-gradient(135deg, #3730a3 0%, #2e27a0 100%); }
+    html.dark-theme .bc-dsp131  { background: linear-gradient(135deg, #065f46 0%, #064e3b 100%); }
+    html.dark-theme .bc-mat103  { background: linear-gradient(135deg, #92400e 0%, #78350f 100%); }
+    html.dark-theme .bc-mat104  { background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%); }
+    html.dark-theme .bc-gur0c2c { background: linear-gradient(135deg, #5b21b6 0%, #4c1d95 100%); }
+    html.dark-theme .book-course-badge {
+      background: rgba(255,255,255,0.08);
+      color: var(--primary-light);
+    }
+    html.dark-theme .course-filter-item.active {
+      background: rgba(96,165,250,0.1);
+      color: var(--primary-light);
+      box-shadow: inset 3px 0 0 var(--primary-light);
+    }
+    html.dark-theme .chip.active {
+      color: var(--primary-light);
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar-mount"></div>
+  <div id="topbar-mount"></div>
+
+  <main class="main-content">
+    <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">منصة الكتب الرقمية</h1>
+    
+
+    <!-- ── Page Header ── -->
+    <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div>
+        <div class="page-title">
+          منصة الكتب
+          <span class="badge badge-warning" style="font-size:11px;vertical-align:middle;margin-right:6px">تجريبي</span>
+        </div>
+        <div class="page-subtitle">المكتبة الرقمية — كتب المقررات الدراسية</div>
+      </div>
+    </div>
+
+    <!-- ── Mobile filter chips ── -->
+    <div class="filter-chips" id="chips">
+      <button class="chip active" data-course="all">الكل</button>
+      <button class="chip" data-course="CSP111">CSP111</button>
+      <button class="chip" data-course="GUR0C2c">GUR0C2c</button>
+      <button class="chip" data-course="CSP142">CSP142</button>
+      <button class="chip" data-course="MAT103">MAT103</button>
+      <button class="chip" data-course="MAT104">MAT104</button>
+      <button class="chip" data-course="DSP131">DSP131</button>
+    </div>
+
+    <!-- ── Main layout ── -->
+    <div class="library-layout">
+
+      <!-- Course Sidebar -->
+      <div class="course-sidebar">
+        <div class="course-sidebar-header">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+          المقررات
+        </div>
+        <button class="course-filter-item active" data-course="all">
+          <div class="cfi-dot" style="background:var(--primary)"></div>
+          <div>
+            <div>جميع الكتب</div>
+            <div class="cfi-code">6 كتب</div>
+          </div>
+        </button>
+        <button class="course-filter-item" data-course="MAT104">
+          <div class="cfi-dot" style="background:#dc2626"></div>
+          <div>
+            <div>احتمالات و إحصاء</div>
+            <div class="cfi-code">MAT104</div>
+          </div>
+        </button>
+        <button class="course-filter-item" data-course="CSP111">
+          <div class="cfi-dot" style="background:#0055A4"></div>
+          <div>
+            <div>الإلكترونيات</div>
+            <div class="cfi-code">CSP111</div>
+          </div>
+        </button>
+        <button class="course-filter-item" data-course="GUR0C2c">
+          <div class="cfi-dot" style="background:#7c3aed"></div>
+          <div>
+            <div>اللغة الإنجليزية 1</div>
+            <div class="cfi-code">GUR0C2c</div>
+          </div>
+        </button>
+        <button class="course-filter-item" data-course="CSP142">
+          <div class="cfi-dot" style="background:#6366f1"></div>
+          <div>
+            <div>برمجة 1</div>
+            <div class="cfi-code">CSP142</div>
+          </div>
+        </button>
+        <button class="course-filter-item" data-course="MAT103">
+          <div class="cfi-dot" style="background:#d97706"></div>
+          <div>
+            <div>رياضيات 2</div>
+            <div class="cfi-code">MAT103</div>
+          </div>
+        </button>
+        <button class="course-filter-item" data-course="DSP131">
+          <div class="cfi-dot" style="background:#059669"></div>
+          <div>
+            <div>مبادئ أنظمة المعلومات</div>
+            <div class="cfi-code">DSP131</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Books Area -->
+      <div>
+        <!-- Search -->
+        <div class="lib-search-wrap">
+          <input type="text" class="lib-search" id="lib-search"
+            placeholder="ابحث عن كتاب..." oninput="filterBooks()" />
+          <svg class="lib-search-icon" width="16" height="16" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-strip">
+          <div class="stat-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+            إجمالي الكتب: <span id="total-count">6</span>
+          </div>
+          <div class="stat-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            المقررات: <span>6</span>
+          </div>
+        </div>
+
+        <!-- Books Grid -->
+        <div class="books-grid" id="books-grid">
+
+          <!-- Book 1: Programming Language I -->
+          <div class="book-card" data-course="CSP142" data-title="programming langue 1">
+            <div class="book-cover bc-csp142">
+              <div class="book-cover-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+              </div>
+            </div>
+            <div class="book-body">
+              <div class="book-title">Programming Language 1</div>
+              <div class="book-course-badge">برمجة 1 · CSP142</div>
+              <div class="book-meta">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                مدير النظام
+              </div>
+            </div>
+            <div class="book-footer">
+              <a href="https://unihub.epnu.edu.eg/library/download/215" class="dl-btn" target="_blank">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                تحميل
+              </a>
+            </div>
+          </div>
+
+          <!-- Book 2: Electronics -->
+          <div class="book-card" data-course="CSP111" data-title="electronics">
+            <div class="book-cover bc-csp111">
+              <div class="book-cover-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19 12h3M2 12h3M12 19v3M12 2v3"/>
+                </svg>
+              </div>
+            </div>
+            <div class="book-body">
+              <div class="book-title">Electronics</div>
+              <div class="book-course-badge">الإلكترونيات · CSP111</div>
+              <div class="book-meta">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                مدير النظام
+              </div>
+            </div>
+            <div class="book-footer">
+              <a href="https://unihub.epnu.edu.eg/library/download/216" class="dl-btn" target="_blank">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                تحميل
+              </a>
+            </div>
+          </div>
+
+          <!-- Book 3: English Language -->
+          <div class="book-card" data-course="GUR0C2c" data-title="english langue">
+            <div class="book-cover bc-gur0c2c">
+              <div class="book-cover-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="2" y1="12" x2="22" y2="12"/>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="book-body">
+              <div class="book-title">English Language 1</div>
+              <div class="book-course-badge">اللغة الإنجليزية · GUR0C2c</div>
+              <div class="book-meta">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                مدير النظام
+              </div>
+            </div>
+            <div class="book-footer">
+              <a href="https://unihub.epnu.edu.eg/library/download/217" class="dl-btn" target="_blank">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                تحميل
+              </a>
+            </div>
+          </div>
+
+          <!-- Book 4: Mathematics II -->
+          <div class="book-card" data-course="MAT103" data-title="mathematics 2 رياضيات">
+            <div class="book-cover bc-mat103">
+              <div class="book-cover-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                  <line x1="19" y1="5" x2="5" y2="19"/>
+                  <circle cx="6.5" cy="6.5" r="2.5"/>
+                  <circle cx="17.5" cy="17.5" r="2.5"/>
+                </svg>
+              </div>
+            </div>
+            <div class="book-body">
+              <div class="book-title">Mathematics 2</div>
+              <div class="book-course-badge">رياضيات 2 · MAT103</div>
+              <div class="book-meta">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                مدير النظام
+              </div>
+            </div>
+            <div class="book-footer">
+              <a href="https://unihub.epnu.edu.eg/library/download/218" class="dl-btn" target="_blank">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                تحميل
+              </a>
+            </div>
+          </div>
+
+          <!-- Book 5: Principles of Information System -->
+          <div class="book-card" data-course="DSP131" data-title="principles of information system مبادئ">
+            <div class="book-cover bc-dsp131">
+              <div class="book-cover-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                  <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                </svg>
+              </div>
+            </div>
+            <div class="book-body">
+              <div class="book-title">Principles of Information System</div>
+              <div class="book-course-badge">مبادئ أنظمة المعلومات · DSP131</div>
+              <div class="book-meta">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                مدير النظام
+              </div>
+            </div>
+            <div class="book-footer">
+              <a href="https://unihub.epnu.edu.eg/library/download/219" class="dl-btn" target="_blank">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                تحميل
+              </a>
+            </div>
+          </div>
+
+          <!-- Book 6: Probability and Statistics -->
+          <div class="book-card" data-course="MAT104" data-title="probability and statistics احتمالات">
+            <div class="book-cover bc-mat104">
+              <div class="book-cover-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                  <line x1="18" y1="20" x2="18" y2="10"/>
+                  <line x1="12" y1="20" x2="12" y2="4"/>
+                  <line x1="6"  y1="20" x2="6"  y2="14"/>
+                </svg>
+              </div>
+            </div>
+            <div class="book-body">
+              <div class="book-title">Probability and Statistics</div>
+              <div class="book-course-badge">احتمالات و إحصاء · MAT104</div>
+              <div class="book-meta">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                مدير النظام
+              </div>
+            </div>
+            <div class="book-footer">
+              <a href="https://unihub.epnu.edu.eg/library/download/220" class="dl-btn" target="_blank">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                تحميل
+              </a>
+            </div>
+          </div>
+
+        </div><!-- /books-grid -->
+      </div>
+    </div><!-- /library-layout -->
+
+  </main>
+
+  <footer class="app-footer">
+    جامعة شرق بورسعيد الأهلية Copyright © 2026 — جميع الحقوق محفوظة
+  </footer>
+
+  <script>
+    let activeFilter = 'all';
+
+    /* ── Sidebar filter ── */
+    document.querySelectorAll('.course-filter-item, .chip').forEach(btn => {
+      btn.addEventListener('click', function() {
+        // Update active state
+        const group = this.classList.contains('chip') ? '.chip' : '.course-filter-item';
+        document.querySelectorAll(group).forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        // Sync other group
+        const course = this.dataset.course;
+        activeFilter = course;
+        document.querySelectorAll(
+          this.classList.contains('chip') ? '.course-filter-item' : '.chip'
+        ).forEach(b => b.classList.toggle('active', b.dataset.course === course));
+        applyFilters();
+      });
+    });
+
+    /* ── Search ── */
+    function filterBooks() { applyFilters(); }
+
+    function applyFilters() {
+      const q = document.getElementById('lib-search').value.toLowerCase();
+      let shown = 0;
+      document.querySelectorAll('.book-card').forEach(card => {
+        const matchCourse = activeFilter === 'all' || card.dataset.course === activeFilter;
+        const matchSearch = !q || card.dataset.title.toLowerCase().includes(q);
+        const visible = matchCourse && matchSearch;
+        card.style.display = visible ? '' : 'none';
+        if (visible) shown++;
+      });
+      document.getElementById('total-count').textContent = shown;
+      // No results state
+      let noEl = document.getElementById('no-results');
+      if (shown === 0) {
+        if (!noEl) {
+          noEl = document.createElement('div');
+          noEl.id = 'no-results';
+          noEl.className = 'no-results';
+          noEl.innerHTML = `
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+              stroke="var(--text-light)" stroke-width="1.5" style="opacity:.5">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <p>لا توجد كتب تطابق بحثك</p>`;
+          document.getElementById('books-grid').appendChild(noEl);
+        }
+        noEl.style.display = '';
+      } else if (noEl) {
+        noEl.style.display = 'none';
+      }
+    }
+  </script>
+
+  <script src="js/sidebar.js"></script>
+  <script src="js/topbar.js"></script>
+  <script src="js/unihub.js"></script>
+</body>
+</html>

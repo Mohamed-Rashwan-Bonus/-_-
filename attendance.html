@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تسجيل الحضور | UniHub — EPNU</title>
+  <meta name="description" content="تسجيل الحضور اليومي — سجّل حضورك للمحاضرات لدى وصولك للجامعة" />
+  <link rel="stylesheet" href="css/neu-system.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <style>
+    /* ══ Layout ══ */
+    .attend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 900px) { .attend-grid { grid-template-columns: 1fr; } }
+
+    /* ══ Section bar ══ */
+    .section-bar {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: var(--radius) var(--radius) 0 0;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 0;
+    }
+    .section-bar.success-bar { background: var(--success); }
+    .section-bar.warn-bar    { background: var(--warning); }
+
+    .neu-card {
+      background: var(--surface);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .card-pad { padding: 24px; }
+
+    /* ══ Live clock ══ */
+    .live-clock-bar {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      padding: 16px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .clock-date { font-size: 13.5px; font-weight: 600; color: var(--text-muted); }
+    .clock-time {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--primary);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -1px;
+    }
+    .clock-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      margin-left: 8px;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:.5; transform:scale(1.3); }
+    }
+
+    /* ══ OTP Code input ══ */
+    .otp-wrap {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 24px 0 20px;
+      flex-wrap: wrap;
+    }
+    .otp-cell {
+      width: 54px; height: 64px;
+      background: var(--surface);
+      border: none;
+      border-radius: var(--radius);
+      box-shadow: var(--neu-pressed);
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-align: center;
+      outline: none;
+      font-family: var(--font);
+      transition: box-shadow 0.2s;
+      caret-color: var(--primary);
+    }
+    .otp-cell:focus {
+      box-shadow: var(--neu-pressed), 0 0 0 3px rgba(0,85,164,0.18);
+    }
+    .otp-cell.filled { color: var(--primary); }
+    @media (max-width: 420px) {
+      .otp-wrap { gap: 6px; }
+      .otp-cell { width: 44px; height: 54px; font-size: 1.5rem; }
+    }
+    @media (max-width: 360px) {
+      .otp-wrap { gap: 5px; }
+      .otp-cell { width: 38px; height: 48px; font-size: 1.3rem; }
+    }
+
+    .otp-submit {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-pill);
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .otp-submit:hover  { background: var(--primary-dark); box-shadow: 0 6px 18px rgba(0,85,164,.3); }
+    .otp-submit:active { transform: scale(0.98); }
+
+    .otp-label {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    /* ══ Success animation ══ */
+    .otp-success {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      text-align: center;
+    }
+    .check-circle {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: rgba(0,166,61,0.1);
+      box-shadow: var(--neu-raised);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px;
+      animation: popIn .4s ease;
+    }
+    @keyframes popIn {
+      0%   { transform: scale(0); opacity: 0; }
+      80%  { transform: scale(1.1); }
+      100% { transform: scale(1);  opacity: 1; }
+    }
+    .success-title { font-size: 16px; font-weight: 700; color: var(--success); margin-bottom: 4px; }
+    .success-sub   { font-size: 13px; color: var(--text-muted); }
+
+    /* ══ Today schedule ══ */
+    .schedule-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(0,65,130,0.06);
+      transition: background 0.2s;
+    }
+    .schedule-item:last-child { border-bottom: none; }
+    .schedule-item:hover { background: rgba(0,85,164,0.03); }
+
+    .schedule-time {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      white-space: nowrap;
+      min-width: 80px;
+    }
+    .schedule-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .schedule-name  { font-size: 13.5px; font-weight: 700; color: var(--text); }
+    .schedule-room  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .status-chip {
+      margin-right: auto;
+      padding: 3px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 11.5px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .chip-now     { background: rgba(0,166,61,0.12);  color:#006628; }
+    .chip-next    { background: rgba(0,85,164,0.10);  color:var(--primary); }
+    .chip-done    { background: rgba(0,0,0,0.06);     color:var(--text-muted); }
+
+    /* ══ Attendance progress ══ */
+    .attend-row {
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(0,65,130,0.06);
+    }
+    .attend-row:last-child { border-bottom: none; }
+
+    .attend-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .attend-course { font-size: 13.5px; font-weight: 700; color: var(--text); }
+    .attend-count  { font-size: 12px; color: var(--text-muted); }
+
+    .progress-track {
+      height: 8px;
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--neu-pressed-sm);
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 8px;
+      transition: width 1s ease;
+    }
+    .fill-safe    { background: var(--success); }
+    .fill-warn    { background: var(--warning); }
+    .fill-danger  { background: var(--danger);  }
+
+    .attend-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: var(--radius-pill);
+      margin-right: 6px;
+    }
+    .ab-safe   { background:rgba(0,166,61,0.12); color:#006628; }
+    .ab-warn   { background:rgba(254,153,0,0.15); color:#7C4700; }
+    .ab-danger { background:rgba(255,33,87,0.12); color:var(--danger); }
+
+    /* ══ Recent log ══ */
+    .log-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(0,65,130,0.05);
+      font-size: 13px;
+    }
+    .log-row:last-child { border-bottom: none; }
+    .log-icon {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .log-icon.present { background:rgba(0,166,61,0.12); color:#006628; }
+    .log-icon.absent  { background:rgba(255,33,87,0.12); color:var(--danger); }
+    .log-course { font-weight: 700; color: var(--text); flex: 1; }
+    .log-date   { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+
+    /* ── Missing: shake animation for OTP wrong input ── */
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%     { transform: translateX(-6px); }
+      40%     { transform: translateX(6px); }
+      60%     { transform: translateX(-4px); }
+      80%     { transform: translateX(4px); }
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar-mount"></div>
+  <div id="topbar-mount"></div>
+
+  <main class="main-content">
+    <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">تسجيل الحضور</h1>
+    
+
+    <!-- ── Page Header ── -->
+    <div class="page-header">
+      <div class="page-title">تسجيل الحضور</div>
+      <div class="page-subtitle">أدخل كود الجلسة الذي يمنحه الأستاذ لتسجيل حضورك</div>
+    </div>
+
+    <!-- ── Live Clock ── -->
+    <div class="live-clock-bar">
+      <div>
+        <div class="clock-date" id="live-date">—</div>
+        <div style="font-size:12px;color:var(--text-light);margin-top:2px">
+          <span class="clock-dot"></span>مباشر
+        </div>
+      </div>
+      <div class="clock-time" id="live-time">00:00:00</div>
+    </div>
+
+    <!-- ═══════════════════════════════
+         Main grid: Code Entry + Schedule
+         ═══════════════════════════════ -->
+    <div class="attend-grid">
+
+      <!-- ── Left: Session Code Entry ── -->
+      <div>
+        <div class="section-bar">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          كود تسجيل الحضور
+        </div>
+        <div class="neu-card">
+          <div class="card-pad" id="otp-section">
+            <p class="otp-label">أدخل الكود المكوّن من 6 أرقام</p>
+            <div class="otp-wrap" id="otp-cells">
+              <input class="otp-cell" type="text" inputmode="numeric" maxlength="1" />
+              <input class="otp-cell" type="text" inputmode="numeric" maxlength="1" />
+              <input class="otp-cell" type="text" inputmode="numeric" maxlength="1" />
+              <input class="otp-cell" type="text" inputmode="numeric" maxlength="1" />
+              <input class="otp-cell" type="text" inputmode="numeric" maxlength="1" />
+              <input class="otp-cell" type="text" inputmode="numeric" maxlength="1" />
+            </div>
+            <button class="otp-submit" id="otp-btn" onclick="submitAttendance()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              تسجيل الحضور الآن
+            </button>
+          </div>
+
+          <!-- Success state (hidden by default) -->
+          <div class="otp-success" id="otp-success">
+            <div class="check-circle">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <div class="success-title">تم تسجيل الحضور بنجاح! ✓</div>
+            <div class="success-sub">CSP142 — Programming Language I</div>
+            <div class="success-sub" style="margin-top:6px;font-size:11px" id="success-time"></div>
+          </div>
+        </div>
+
+        <!-- Warning notice -->
+        <div class="alert alert-warning">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" style="flex-shrink:0">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          تجاوز نسبة الغياب 25% يؤدي إلى الحرمان من الامتحان
+        </div>
+      </div>
+
+      <!-- ── Right: Today's Schedule ── -->
+      <div>
+        <div class="section-bar success-bar">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          جدول اليوم — <span id="today-day-label">...</span>
+        </div>
+        <div class="neu-card">
+          <div class="schedule-item">
+            <div class="schedule-time">8:00 - 9:30</div>
+            <div class="schedule-dot" style="background:var(--text-light)"></div>
+            <div>
+              <div class="schedule-name">Mathematics II</div>
+              <div class="schedule-room">قاعة A101 — MAT103</div>
+            </div>
+            <span class="status-chip chip-done">انتهت</span>
+          </div>
+          <div class="schedule-item">
+            <div class="schedule-time">9:45 - 11:15</div>
+            <div class="schedule-dot" style="background:var(--success)"></div>
+            <div>
+              <div class="schedule-name">Programming Language I</div>
+              <div class="schedule-room">معمل CS2 — CSP142</div>
+            </div>
+            <span class="status-chip chip-now">الآن 🔴</span>
+          </div>
+          <div class="schedule-item">
+            <div class="schedule-time">11:30 - 1:00</div>
+            <div class="schedule-dot" style="background:var(--primary)"></div>
+            <div>
+              <div class="schedule-name">Electronics</div>
+              <div class="schedule-room">قاعة B204 — CSP111</div>
+            </div>
+            <span class="status-chip chip-next">قريباً</span>
+          </div>
+          <div class="schedule-item">
+            <div class="schedule-time">1:15 - 2:45</div>
+            <div class="schedule-dot" style="background:var(--text-light)"></div>
+            <div>
+              <div class="schedule-name">Principles of Information System</div>
+              <div class="schedule-room">قاعة A202 — DSP131</div>
+            </div>
+            <span class="status-chip chip-next">لاحقاً</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════
+         Bottom grid: Progress + Log
+         ═══════════════════════════════ -->
+    <div class="attend-grid">
+
+      <!-- ── Attendance Progress ── -->
+      <div>
+        <div class="section-bar">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6"  y1="20" x2="6"  y2="14"/>
+          </svg>
+          نسبة الحضور لكل مادة
+        </div>
+        <div class="neu-card">
+          <!-- CSP142 -->
+          <div class="attend-row">
+            <div class="attend-top">
+              <div>
+                <div class="attend-course">Programming Language I</div>
+                <div class="attend-count text-muted text-sm">8 / 10 جلسات</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <span class="attend-badge ab-safe">آمن</span>
+                <span class="font-bold" style="color:var(--success)">80%</span>
+              </div>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill fill-safe" style="width:80%"></div>
+            </div>
+          </div>
+
+          <!-- MAT103 -->
+          <div class="attend-row">
+            <div class="attend-top">
+              <div>
+                <div class="attend-course">Mathematics II</div>
+                <div class="attend-count text-muted text-sm">6 / 10 جلسات</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <span class="attend-badge ab-warn">⚠️ تحذير</span>
+                <span class="font-bold" style="color:var(--warning)">60%</span>
+              </div>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill fill-warn" style="width:60%"></div>
+            </div>
+          </div>
+
+          <!-- CSP111 -->
+          <div class="attend-row">
+            <div class="attend-top">
+              <div>
+                <div class="attend-course">Electronics</div>
+                <div class="attend-count text-muted text-sm">9 / 10 جلسات</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <span class="attend-badge ab-safe">ممتاز</span>
+                <span class="font-bold" style="color:var(--success)">90%</span>
+              </div>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill fill-safe" style="width:90%"></div>
+            </div>
+          </div>
+
+          <!-- DSP131 -->
+          <div class="attend-row">
+            <div class="attend-top">
+              <div>
+                <div class="attend-course">Principles of Information System</div>
+                <div class="attend-count text-muted text-sm">5 / 10 جلسات</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <span class="attend-badge ab-danger">🚨 خطر</span>
+                <span class="font-bold" style="color:var(--danger)">50%</span>
+              </div>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill fill-danger" style="width:50%"></div>
+            </div>
+          </div>
+
+          <!-- MAT104 -->
+          <div class="attend-row">
+            <div class="attend-top">
+              <div>
+                <div class="attend-course">Probability and Statistics</div>
+                <div class="attend-count text-muted text-sm">7 / 10 جلسات</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <span class="attend-badge ab-safe">آمن</span>
+                <span class="font-bold" style="color:var(--success)">70%</span>
+              </div>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill fill-safe" style="width:70%"></div>
+            </div>
+          </div>
+
+          <!-- GUR0C2c -->
+          <div class="attend-row">
+            <div class="attend-top">
+              <div>
+                <div class="attend-course">English Language 1</div>
+                <div class="attend-count text-muted text-sm">8 / 10 جلسات</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <span class="attend-badge ab-safe">آمن</span>
+                <span class="font-bold" style="color:var(--success)">80%</span>
+              </div>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill fill-safe" style="width:80%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Recent Attendance Log ── -->
+      <div>
+        <div class="section-bar warn-bar">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          آخر سجلات الحضور
+        </div>
+        <div class="neu-card">
+          <div class="log-row">
+            <div class="log-icon present">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <div class="log-course">Programming Language I</div>
+            <div class="log-date">اليوم 9:50 ص</div>
+          </div>
+          <div class="log-row">
+            <div class="log-icon present">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <div class="log-course">Mathematics II</div>
+            <div class="log-date">الأمس 8:10 ص</div>
+          </div>
+          <div class="log-row">
+            <div class="log-icon absent">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </div>
+            <div class="log-course">Principles of Info. System</div>
+            <div class="log-date">13 أبريل</div>
+          </div>
+          <div class="log-row">
+            <div class="log-icon present">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <div class="log-course">Electronics</div>
+            <div class="log-date">12 أبريل</div>
+          </div>
+          <div class="log-row">
+            <div class="log-icon absent">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </div>
+            <div class="log-course">Mathematics II</div>
+            <div class="log-date">12 أبريل</div>
+          </div>
+          <div class="log-row">
+            <div class="log-icon present">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <div class="log-course">English Language 1</div>
+            <div class="log-date">11 أبريل</div>
+          </div>
+          <div class="log-row">
+            <div class="log-icon absent">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </div>
+            <div class="log-course">Principles of Info. System</div>
+            <div class="log-date">10 أبريل</div>
+          </div>
+          <div class="log-row">
+            <div class="log-icon present">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <div class="log-course">Probability and Statistics</div>
+            <div class="log-date">9 أبريل</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="app-footer">
+    جامعة شرق بورسعيد الأهلية Copyright © 2026 — جميع الحقوق محفوظة
+  </footer>
+
+  <script>
+    /* ── Live Clock ── */
+    const days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    const months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('live-time').textContent =
+        now.toLocaleTimeString('ar-EG', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+      document.getElementById('live-date').textContent =
+        `${days[now.getDay()]}، ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+    // ── تحديث عنوان جدول اليوم ──
+    (function() {
+      const d = new Date();
+      const el = document.getElementById('today-day-label');
+      if (el) el.textContent = days[d.getDay()] + ' ' + d.getDate() + ' ' + months[d.getMonth()];
+    })();
+
+    /* ── OTP Input Behavior ── */
+    const cells = document.querySelectorAll('.otp-cell');
+    cells.forEach((cell, i) => {
+      cell.addEventListener('input', (e) => {
+        const val = e.target.value.replace(/\D/g,'');
+        e.target.value = val;
+        if (val && i < cells.length - 1) cells[i + 1].focus();
+        e.target.classList.toggle('filled', !!val);
+      });
+      cell.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !cell.value && i > 0) {
+          cells[i - 1].value = '';
+          cells[i - 1].classList.remove('filled');
+          cells[i - 1].focus();
+        }
+      });
+      cell.addEventListener('paste', (e) => {
+        const data = e.clipboardData.getData('text').replace(/\D/g,'').slice(0,6);
+        cells.forEach((c, j) => {
+          c.value = data[j] || '';
+          c.classList.toggle('filled', !!c.value);
+        });
+        cells[Math.min(data.length, 5)].focus();
+        e.preventDefault();
+      });
+    });
+
+    /* ── Submit Attendance ── */
+    function submitAttendance() {
+      const code = Array.from(cells).map(c => c.value).join('');
+      if (code.length < 6) {
+        const targetCell = cells[code.length] || cells[0];
+        targetCell.focus();
+        targetCell.style.animation = 'shake 0.3s';
+        setTimeout(() => { targetCell.style.animation = ''; }, 350); // fix: clear same cell
+        return;
+      }
+      // Show success
+      document.getElementById('otp-section').style.display = 'none';
+      const suc = document.getElementById('otp-success');
+      suc.style.display = 'flex';
+      document.getElementById('success-time').textContent =
+        new Date().toLocaleTimeString('ar-EG', { hour:'2-digit', minute:'2-digit' });
+    }
+  </script>
+
+  <script src="js/sidebar.js"></script>
+  <script src="js/topbar.js"></script>
+  <script src="js/unihub.js"></script>
+</body>
+</html>

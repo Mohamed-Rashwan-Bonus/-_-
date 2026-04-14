@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <title>Student Course Registration Application Form</title>
+  <style>
+    /* Print-optimized styling */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Cairo:wght@400;700&display=swap');
+
+    @page {
+      size: A4;
+      margin: 15mm 20mm;
+    }
+
+    body {
+      font-family: 'Inter', 'Cairo', sans-serif;
+      color: #000;
+      background: #fff;
+      margin: 0;
+      padding: 0;
+      font-size: 11px;
+      line-height: 1.5;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* Container */
+    .document-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #000;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+
+    .org-english {
+      text-align: left;
+    }
+
+    .org-arabic {
+      text-align: right;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .org-title {
+      font-size: 14px;
+      font-weight: bold;
+      text-transform: capitalize;
+    }
+
+    .org-subtitle {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .logo-container {
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    .logo-container img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+    }
+
+    /* Document Title */
+    .doc-title {
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin: 15px 0 5px 0;
+      text-decoration: underline;
+    }
+
+    .doc-meta {
+      text-align: center;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    /* Sections */
+    .section {
+      margin-bottom: 15px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: bold;
+      background-color: #f0f0f0;
+      padding: 4px 8px;
+      border: 1px solid #000;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    /* Info Grids */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 40px;
+      row-gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .info-item {
+      display: flex;
+    }
+
+    .info-label {
+      font-weight: bold;
+      width: 120px;
+      flex-shrink: 0;
+    }
+
+    .info-label::after {
+      content: ":";
+      float: right;
+      margin-right: 5px;
+    }
+
+    .info-value {
+      flex: 1;
+      border-bottom: 1px dotted #888;
+      padding-left: 5px;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+      font-size: 10.5px;
+    }
+
+    th, td {
+      border: 1px solid #000;
+      padding: 6px 4px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #e8e8e8;
+      font-weight: bold;
+    }
+
+    .col-left { text-align: left; padding-left: 8px; }
+
+    /* Totals */
+    .totals {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .signature-area {
+      margin-top: 30px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .signature-box {
+      text-align: center;
+      width: 200px;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 50px;
+      border-top: 1px solid #000;
+      padding-top: 8px;
+      font-size: 9px;
+      text-align: center;
+      color: #333;
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .footer-left { text-align: left; }
+    .footer-right { text-align: right; }
+
+    /* Print command to ensure prints immediately when opened */
+    @media screen {
+      body { background: #525659; padding: 20px; }
+      .document-container { background: #fff; padding: 20mm; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+    }
+  </style>
+</head>
+<body onload="window.print()">
+
+  <div class="document-container">
+    
+    <!-- HEADER -->
+    <div class="header">
+      <div class="org-english">
+        <div class="org-title">East Port Said National University</div>
+        <div class="org-subtitle">Faculty of Computer Science and<br>Information Technology</div>
+      </div>
+      <div class="logo-container">
+        <img src="https://epnu.edu.eg/wp-content/uploads/2024/01/epnu-logo.png" alt="EPNU Logo">
+      </div>
+      <div class="org-arabic">
+        <div class="org-title">جامعة شرق بورسعيد الأهلية</div>
+        <div class="org-subtitle">كلية علوم الحاسب وتقنية المعلومات</div>
+      </div>
+    </div>
+
+    <!-- DOCUMENT TITLE -->
+    <div class="doc-title">Student Course Registration Application Form</div>
+    <div class="doc-meta">
+      Academic Year : 2025-2026 &nbsp;&nbsp;|&nbsp;&nbsp; Semester : Spring
+    </div>
+
+    <!-- STUDENT DATA -->
+    <div class="section">
+      <div class="section-title">Student Information</div>
+      <div class="info-grid" style="grid-template-columns: 1fr;">
+        <div class="info-item">
+          <div class="info-label">Student Name</div>
+          <div class="info-value">Ahmed Mahmoud Saleh</div>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">Student ID</div>
+          <div class="info-value">29990001</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">National Nu.</div>
+          <div class="info-value">30501010100011</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Program</div>
+          <div class="info-value">Computer Science</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Nationality</div>
+          <div class="info-value">Egyptian</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Birth Date</div>
+          <div class="info-value">2005-05-15</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Admission year</div>
+          <div class="info-value">2025-2026</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACADEMIC RECORD -->
+    <div class="section">
+      <div class="section-title">Academic Record</div>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">CGPA</div>
+          <div class="info-value">1.78</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">GPA</div>
+          <div class="info-value">1.78</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REGISTRATION TABLE -->
+    <div class="section">
+      <div class="section-title">Registration Details</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Course Code</th>
+            <th class="col-left">Course Name</th>
+            <th>Credit</th>
+            <th>Prerequisite<br>Course Code</th>
+            <th class="col-left">Prerequisite<br>Course Name</th>
+            <th>Credit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>MAT103</td>
+            <td class="col-left">Mathematics II</td>
+            <td>3.00</td>
+            <td>MAT101</td>
+            <td class="col-left">Mathematics I</td>
+            <td>3.00</td>
+          </tr>
+          <tr>
+            <td>CSP111</td>
+            <td class="col-left">Electronics</td>
+            <td>3.00</td>
+            <td>....</td>
+            <td class="col-left">....</td>
+            <td>....</td>
+          </tr>
+          <tr>
+            <td>MAT104</td>
+            <td class="col-left">Probability and Statistics</td>
+            <td>3.00</td>
+            <td>....</td>
+            <td class="col-left">....</td>
+            <td>....</td>
+          </tr>
+          <tr>
+            <td>CSP142</td>
+            <td class="col-left">Programming Language I</td>
+            <td>3.00</td>
+            <td>CSP141</td>
+            <td class="col-left">Programming Fundamentals</td>
+            <td>3.00</td>
+          </tr>
+          <tr>
+            <td>DSP131</td>
+            <td class="col-left">Principles of Information System</td>
+            <td>3.00</td>
+            <td>....</td>
+            <td class="col-left">....</td>
+            <td>....</td>
+          </tr>
+          <tr>
+            <td>GUR0C2c</td>
+            <td class="col-left">English Language 1</td>
+            <td>2.00</td>
+            <td>....</td>
+            <td class="col-left">....</td>
+            <td>....</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="totals">
+        Total Registered Credit : 17
+      </div>
+
+      <div class="signature-area">
+        <div class="signature-box">
+          <div>Student Signature</div>
+          <div style="margin-top: 15px;">.........................................</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <div class="footer-content">
+        <div class="footer-left">
+          <strong>East Port Said National University</strong><br>
+          East Port Said, New Port Said City, Salam, Egypt<br>
+          www.epnu.edu.eg
+        </div>
+        <div class="footer-right" style="text-align:right">
+          <strong>جامعة شرق بورسعيد الأهلية</strong><br>
+          شرق بورسعيد، مدينة بورسعيد الجديدة، سلام، مصر
+        </div>
+      </div>
+      <div>This Report is Generated by UNIHUB Management System.</div>
+    </div>
+
+  </div>
+
+</body>
+</html>

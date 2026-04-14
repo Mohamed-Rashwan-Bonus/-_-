@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تسجيل المواد | UniHub — EPNU</title>
+  <meta name="description" content="التسجيل الأكاديمي — تسجيل المقررات الدراسية للفصل الدراسي الجديد" />
+  <link rel="stylesheet" href="css/neu-system.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <style>
+    /* ── Section bar ── */
+    .section-bar {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: var(--radius) var(--radius) 0 0;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-bar.warning-bar { background: var(--warning); }
+
+    /* ── Neu-card wrapper ── */
+    .neu-card {
+      background: var(--surface);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .neu-card-pad { padding: 20px; }
+
+    /* ── Stats grid ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .stat-box {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--neu-pressed);
+      padding: 20px 16px;
+      text-align: center;
+      transition: var(--transition);
+    }
+    .stat-box:hover { box-shadow: var(--neu-flat); }
+
+    .stat-num {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-num.primary { color: var(--primary); }
+    .stat-num.warning { color: var(--warning); }
+    .stat-num.info    { color: var(--info);    }
+    .stat-num.success { color: var(--success); }
+
+    .stat-lbl { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 3px; }
+    .stat-sub { font-size: 11px; color: var(--text-light); }
+
+    /* ── GPA grid ── */
+    .gpa-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      padding: 20px;
+    }
+
+    .gpa-box {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--neu-raised-sm);
+      padding: 18px 14px;
+      text-align: center;
+    }
+
+    .gpa-val {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+    .gpa-label { font-size: 11.5px; color: var(--text-muted); font-weight: 500; }
+
+    /* ── Print button ── */
+    .print-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      box-shadow: var(--neu-raised);
+      border: none;
+      color: var(--primary);
+      padding: 11px 24px;
+      border-radius: var(--radius-pill);
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: var(--font);
+      text-decoration: none;
+    }
+    .print-btn:hover {
+      box-shadow: var(--neu-raised-lg);
+      color: var(--primary);
+      transform: translateY(-2px);
+    }
+    .print-btn:active { box-shadow: var(--neu-pressed); transform: translateY(0); }
+
+    /* ── Course status badge ── */
+    .badge-accepted {
+      background: rgba(0,166,61,0.12);
+      color: #006628;
+      padding: 4px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    /* ── Registration form ── */
+    .reg-form {
+      padding: 20px;
+      background: rgba(0,85,164,0.03);
+    }
+
+    .reg-select {
+      width: 100%;
+      background: var(--surface);
+      border: none;
+      border-radius: var(--radius);
+      box-shadow: var(--neu-pressed-sm);
+      padding: 11px 16px;
+      font-size: 13.5px;
+      color: var(--text);
+      font-family: var(--font);
+      outline: none;
+      appearance: none;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .reg-select:focus { box-shadow: var(--neu-pressed), 0 0 0 3px rgba(0,85,164,0.12); }
+
+    .reg-form-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .reg-form-row .reg-select { flex: 1; }
+
+    .reg-submit-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 11px 20px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: var(--font);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .reg-submit-btn:hover { background: var(--primary-dark); box-shadow: 0 4px 14px rgba(0,85,164,0.3); }
+
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .gpa-grid   { grid-template-columns: 1fr; }
+      .reg-form-row { flex-direction: column; }
+    }
+    @media (max-width: 640px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .gpa-grid   { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .gpa-grid   { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar-mount"></div>
+  <div id="topbar-mount"></div>
+
+  <main class="main-content">
+    <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">تسجيل المواد الدراسية</h1>
+    
+
+    <!-- ── Page Header ── -->
+    <div class="page-header">
+      <div class="page-title">تسجيل المواد</div>
+      <div class="page-subtitle">العام الدراسي: 2025-2026 — الفصل الدراسي: الثاني</div>
+    </div>
+
+    <!-- ── Print button ── -->
+    <div style="margin-bottom:24px">
+      <button type="button" class="print-btn" onclick="window.open('print-registration.html', '_blank')" aria-label="طباعة إستمارة تسجيل المواد">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        طباعة إستمارة تسجيل المواد
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════
+         1. Student Data
+         ══════════════════════════════ -->
+    <div class="section-bar">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      بياناتك
+    </div>
+    <div class="neu-card">
+      <div style="overflow-x:auto">
+        <table class="neu-table">
+          <thead>
+            <tr>
+              <th scope="col" style="text-align:center">كود الطالب</th>
+              <th scope="col">الاسم</th>
+              <th scope="col">الكلية</th>
+              <th scope="col">البرنامج</th>
+              <th scope="col" style="text-align:center">سنة الالتحاق</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align:center"><span class="badge badge-primary">29990001</span></td>
+              <td class="font-bold">أحمد محمود صالح</td>
+              <td class="text-sm">Faculty of Computer Science and Information Technology</td>
+              <td>Computer Science</td>
+              <td style="text-align:center">2025-2026</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         2. GPA Section
+         ══════════════════════════════ -->
+    <div class="section-bar">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      المعدل التراكمي
+    </div>
+    <div class="neu-card">
+      <div class="gpa-grid">
+        <div class="gpa-box">
+          <div class="gpa-val">1.78</div>
+          <div class="gpa-label">المعدل التراكمي</div>
+        </div>
+        <div class="gpa-box">
+          <div class="gpa-val">16</div>
+          <div class="gpa-label">إجمالي الساعات المعتمدة المنجزة</div>
+        </div>
+        <div class="gpa-box">
+          <div class="gpa-val">16</div>
+          <div class="gpa-label">إجمالي الساعات المعتمدة المسجّلة</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         3. Last Semester Data
+         ══════════════════════════════ -->
+    <div class="section-bar warning-bar">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      بيانات الفصل الدراسي الأخير
+    </div>
+    <div class="neu-card">
+      <div class="gpa-grid">
+        <div class="gpa-box">
+          <div class="gpa-val" style="color:var(--warning)">1.78</div>
+          <div class="gpa-label">المعدل الفصلي</div>
+        </div>
+        <div class="gpa-box">
+          <div class="gpa-val" style="color:var(--warning)">16</div>
+          <div class="gpa-label">إجمالي الساعات المعتمدة المنجزة</div>
+        </div>
+        <div class="gpa-box">
+          <div class="gpa-val" style="color:var(--warning)">16</div>
+          <div class="gpa-label">إجمالي الساعات المعتمدة المسجّلة</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         4. Hours Stats (3 cards)
+         ══════════════════════════════ -->
+    <div class="stats-grid" style="margin-bottom:24px">
+      <div class="stat-box">
+        <div class="stat-lbl">الساعات المتاحة</div>
+        <div class="stat-num primary">16.00</div>
+        <div class="stat-sub">المتاح للتسجيل</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-lbl">الساعات المسجّلة</div>
+        <div class="stat-num warning">16</div>
+        <div class="stat-sub">المسجّلة / المطلوبة</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-lbl">المتبقي</div>
+        <div class="stat-num info">0</div>
+        <div class="stat-sub">الساعات المتبقية</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         5. Registered Courses Table
+         ══════════════════════════════ -->
+    <div class="section-bar">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 11l3 3L22 4"/>
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      حالة المواد المسجّلة
+    </div>
+    <div class="neu-card">
+      <div style="overflow-x:auto">
+        <table class="neu-table">
+          <thead>
+            <tr>
+              <th scope="col" style="text-align:center;width:12%">كود المادة</th>
+              <th scope="col" style="width:50%">اسم المقرر</th>
+              <th scope="col" style="text-align:center;width:14%">ساعات معتمدة</th>
+              <th scope="col" style="text-align:center;width:14%">الحالة</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align:center"><span class="badge badge-primary">MAT103</span></td>
+              <td class="font-semibold">Mathematics II</td>
+              <td style="text-align:center">3.00</td>
+              <td style="text-align:center"><span class="badge-accepted">مقبول</span></td>
+            </tr>
+            <tr>
+              <td style="text-align:center"><span class="badge badge-primary">CSP111</span></td>
+              <td class="font-semibold">Electronics</td>
+              <td style="text-align:center">3.00</td>
+              <td style="text-align:center"><span class="badge-accepted">مقبول</span></td>
+            </tr>
+            <tr>
+              <td style="text-align:center"><span class="badge badge-primary">MAT104</span></td>
+              <td class="font-semibold">Probability and Statistics</td>
+              <td style="text-align:center">3.00</td>
+              <td style="text-align:center"><span class="badge-accepted">مقبول</span></td>
+            </tr>
+            <tr>
+              <td style="text-align:center"><span class="badge badge-primary">CSP142</span></td>
+              <td class="font-semibold">Programming Language I</td>
+              <td style="text-align:center">3.00</td>
+              <td style="text-align:center"><span class="badge-accepted">مقبول</span></td>
+            </tr>
+            <tr>
+              <td style="text-align:center"><span class="badge badge-primary">DSP131</span></td>
+              <td class="font-semibold">Principles of Information System</td>
+              <td style="text-align:center">3.00</td>
+              <td style="text-align:center"><span class="badge-accepted">مقبول</span></td>
+            </tr>
+            <tr>
+              <td style="text-align:center"><span class="badge badge-warning">GUR0C2c</span></td>
+              <td class="font-semibold">English Language 1</td>
+              <td style="text-align:center">
+                <span class="font-bold" style="color:var(--warning)">2.00</span>
+              </td>
+              <td style="text-align:center"><span class="badge-accepted">مقبول</span></td>
+            </tr>
+          </tbody>
+          <!-- Total row -->
+          <tfoot>
+            <tr style="background:rgba(0,85,164,0.05)">
+              <td colspan="2" style="text-align:right;padding-right:20px">
+                <span class="font-bold text-muted">إجمالي الساعات</span>
+              </td>
+              <td style="text-align:center;font-weight:800;color:var(--primary);font-size:15px">16.00</td>
+              <td style="text-align:center">
+                <span class="badge-accepted">كل المواد مقبولة</span>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         6. Registration Form
+         ══════════════════════════════ -->
+    <div class="section-bar">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      لتسجيل المواد
+    </div>
+    <div class="neu-card">
+      <div class="reg-form">
+        <div class="alert alert-info" style="margin-bottom:16px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" style="flex-shrink:0">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          لقد سجّلت الحد الأقصى المسموح به (16 ساعة). تواصل مع إدارة شؤون الطلاب لأي تعديلات.
+        </div>
+        <form onsubmit="return false">
+          <div class="reg-form-row">
+            <select class="reg-select" name="enrollment_id" required disabled
+              aria-label="اختر مقرراً للتسجيل">
+              <option value="">اختر المادة للتسجيل...</option>
+              <optgroup label="مواد المستوى الأول"></optgroup>
+              <optgroup label="مواد المستوى الثاني"></optgroup>
+              <optgroup label="مواد المستوى الثالث"></optgroup>
+            </select>
+            <button type="submit" class="reg-submit-btn" disabled>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              إضافة
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="app-footer">
+    جامعة شرق بورسعيد الأهلية Copyright © 2026 — جميع الحقوق محفوظة
+  </footer>
+
+  <script src="js/sidebar.js"></script>
+  <script src="js/topbar.js"></script>
+  <script src="js/unihub.js"></script>
+</body>
+</html>
